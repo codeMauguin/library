@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="app.dao.OrderDao">
+    <insert id="createOrder">
+        INSERT INTO lb_order (id, card_id, status)
+        VALUES (#{orderId}, #{id}, 0)
+    </insert>
+    <insert id="createBorrowed">
+        INSERT INTO lb_borrow (order_id, book_id, returnTime, status)
+        VALUES (#{orderId}, #{bookId}, #{localDateTime}, -2)
+    </insert>
+    <update id="updateOrder">
+        UPDATE lb_order
+        SET status = -1
+        WHERE id = #{orderId}
+        AND status = 0
+    </update>
+    <update id="finalOrder">
+        UPDATE lb_order
+        SET status = 1
+        , reason = '订单完成'
+        , end_time = NOW()
+        WHERE id = #{orderId}
+        AND status = -1
+    </update>
+    <update id="failOrder">
+        UPDATE lb_order lb
+        SET lb.status = IFNULL(#{ss}, -2)
+        , lb.reason = #{reason}
+        , lb.end_time = NOW()
+        WHERE id = #{orderId}
+        AND lb.status = -1
+    </update>
+    <update id="timeoutOrder">
+        UPDATE lb_order
+        SET status = 4,
+        end_time = NOW()
+        WHERE id = #{order}
+    </update>
+    <update id="updateBorrowed">
+        UPDATE lb_borrow
+        SET status = #{status},
+        create_time = NOW()
+        WHERE book_id = #{bookId}
+        AND order_id = #{orderId}
+    </update>
+    <update id="returnBook">
+        UPDATE lb_borrow
+        SET status = 1,
+        returnTime = NOW()
+        WHERE id = #{id}
+        AND status = 0
+    </update>
+    <select id="queryBookIds" resultType="java.lang.Long">
+        SELECT book_id
+        FROM lb_borrow
+        WHERE order_id = #{orderId}
+        AND status = -2
+    </select>
+
+    <select id="checkBooksHasCreate" resultType="java.lang.Boolean">
+        SELECT 1
+        FROM lb_borrow lb
+        INNER JOIN lb_order lo ON lo.id = lb.order_id
+        WHERE lo.card_id= #{query} AND lb.status = 0 AND lb.returnTime >=NOW() AND lb.book_id in
+        <foreach collection="bookIds" close=")" index="index" item="item" open="(" separator=",">
+            #{item}
+        </foreach>
+        limit 1
+    </select>
+</mapper>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="app.dao.QueryDao">
+    <select id="getOrders" resultType="app.pojo.order">
+        SELECT id, create_time, end_time, status, reason
+        FROM lb_order
+        WHERE card_id = #{id}
+        ORDER BY create_time DESC
+        LIMIT #{pageInfo.offset},#{pageInfo.pageSize};
+    </select>
+    <select id="getOrdersByCondition" resultType="app.pojo.order">
+        SELECT id, create_time, end_time, status, reason
+        FROM lb_order lo
+        WHERE lo.card_id = #{query}
+        <if test="start != null">
+            AND lo.create_time > #{start}
+        </if>
+        <if test="end != null">
+            AND (#{end} > lo.end_time OR lo.end_time is null)
+        </if>
+        <if test="status != null">
+            <choose>
+                <when test="status == 1">
+                    AND lo.status = 1
+                </when>
+                <when test="status == 0">
+                    AND lo.status = 0
+                </when>
+                <otherwise>
+                    AND lo.status in (2, 3, 4)
+                </otherwise>
+            </choose>
+        </if>
+        <if test="orderId != null">
+            AND lo.id LIKE CONCAT('%', #{orderId}, '%')
+        </if>
+        ORDER BY create_time DESC
+    </select>
+    <select id="getBorrowers" resultType="app.pojo.BorrowedTable">
+        SELECT lb.*
+        FROM lb_borrow lb
+        LEFT JOIN lb_order l on lb.order_id = l.id
+        WHERE lb.status > -2
+        AND l.card_id = #{id}
+        <choose>
+            <when test="status != null">
+                <foreach collection="status" item="item" open="AND lb.status in (" separator=","
+                         close=")"
+                >
+                    #{item}
+                </foreach>
+            </when>
+        </choose>
+        ORDER BY lb.create_time DESC, lb.status ASC
+        LIMIT #{pageInfo.offset},#{pageInfo.pageSize}
+    </select>
+    <select id="getBorrowedSize" resultType="java.lang.Integer">
+        SELECT COUNT(lb.book_id)
+        FROM lb_borrow lb
+        LEFT JOIN lb_order l on lb.order_id = l.id
+        WHERE lb.status > -2
+        AND l.card_id = #{id}
+        <choose>
+            <when test="status != null">
+                <foreach collection="status" item="item" open="AND lb.status in (" separator=","
+                         close=")"
+                >
+                    #{item}
+                </foreach>
+            </when>
+        </choose>
+    </select>
+    <select id="getBorrowed" resultType="app.pojo.BorrowedTable">
+        SELECT lb.*
+        FROM lb_borrow lb
+        LEFT JOIN lb_order lo on lo.id = lb.order_id
+        WHERE lb.id = #{id}
+        AND lo.card_id = #{query}
+    </select>
+    <select id="getHasBorrowed" resultType="java.lang.Long">
+        SELECT book_id
+        FROM lb_borrow lb
+        LEFT JOIN lb_order lo on lo.id = lb.order_id
+        WHERE lo.card_id = #{cardId}
+        AND lb.status = 0
+        AND lb.returnTime >= NOW()
+    </select>
+
+    <update id="renewal" keyProperty="table.returnTime" keyColumn="returnTime" flushCache="true">
+        <selectKey resultType="java.time.LocalDateTime" keyColumn="returnTime"
+
+                   keyProperty="table.returnTime" order="AFTER">
+            SELECT returnTime
+            FROM lb_borrow lb
+            WHERE lb.id = #{table.id}
+        </selectKey>
+        UPDATE lb_borrow lb
+        SET renewal = renewal + 1,
+        returnTime = DATE_ADD(returnTime, INTERVAL 15 DAY)
+        WHERE id = #{table.id}
+        AND status = 0
+        AND (SELECT 1
+        FROM lb_order lo
+        WHERE lo.id = lb.order_id
+        AND lo.card_id =
+        #{table.orderId})
+    </update>
+</mapper>

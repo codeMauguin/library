@@ -1,0 +1,24 @@
+server:
+  port: 7000
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+        namespace: public
+
+  data:
+    redis:
+      client-type: lettuce
+      host: 127.0.0.1
+      port: 6379
+      connect-timeout: 10s
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 200
+          max-wait: -1ms
+          max-idle: 10
+          min-idle: 0

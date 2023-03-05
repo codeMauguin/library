@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: comment-service
+  datasource:
+    druid:
+      url: jdbc:mysql://127.0.0.1:3306/library_comment?autoReconnect=true&failOverReadOnly=false&rewriteBatchedStatements=true
+  cloud:
+    nacos:
+      discovery:
+        namespace: public
+      server-addr: 127.0.0.1:8848
+
+server:
+  port: 8014
+logging:
+  level:
+    app:
+      dao: debug

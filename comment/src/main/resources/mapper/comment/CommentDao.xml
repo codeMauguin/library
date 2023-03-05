@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="app.dao.CommentDao">
+    <insert id="commit" parameterType="app.pojo.Comment">
+        INSERT INTO lb_comments (id, bookId, user_id,
+        content,
+        parent_id, root_id)
+        SELECT #{comment.id} as id,
+        #{comment.bookId} as bookId,
+        #{comment.user_id} as user_id,
+        #{comment.content} as content,
+        #{comment.parent_id} as parent_id,
+        IFNULL((SELECT root_id FROM lb_comments WHERE id = #{comment.parent_id}),
+        #{comment.parent_id})
+        as rootId
+    </insert>
+
+    <resultMap id="comment" type="app.pojo.Comment" autoMapping="true">
+        <id column="id" property="id"/>
+        <result column="child_size" property="child_size"/>
+        <result column="liked" property="liked"/>
+        <result column="unLiked" property="unLike"/>
+        <result column="isLike" property="isLiked"/>
+        <result column="userId" property="user_id"/>
+        <result column="isUnLiked" property="isUnLiked"/>
+    </resultMap>
+
+
+    <select id="queryCommentRoot" resultMap="comment">
+        SELECT lb.*,
+        (SELECT COUNT(lc.id) FROM lb_comments lc WHERE lc.root_id = lb.id) as
+        child_size
+        FROM lb_comments lb
+        WHERE bookId = #{bookId}
+        AND root_id IS NULL
+        <choose>
+            <when test="pageInfo.id != null">
+                AND lb.id > #{pageInfo.id}
+                ORDER BY lb.id
+                LIMIT #{pageInfo.pageSize}
+            </when>
+            <otherwise>
+                ORDER BY lb.id
+                LIMIT #{pageInfo.offset},#{pageInfo.pageSize}
+            </otherwise>
+        </choose>
+    </select>
+    <select id="queryComment" resultMap="comment">
+        SELECT (SELECT COUNT(lci.comment_id) FROM lb_comment_info lci WHERE lci.comment_id = #{id}
+        AND status = 0) as
+        liked,
+        (SELECT user_id FROM lb_comments WHERE id = #{id}) as userId,
+        (SELECT COUNT(lci.comment_id)
+        FROM lb_comment_info lci
+        WHERE lci.comment_id = #{id}
+        AND status = 1) as unLiked
+        <choose>
+            <when test="userId != null">
+                ,
+                (SELECT 1
+                FROM lb_comment_info l
+                WHERE l.comment_id = #{id}
+                AND l.userId = #{userId}
+                AND l.status
+                = 0)
+                as
+                isLike,
+                (SELECT status
+                FROM lb_comment_info i
+                WHERE i.comment_id = #{id}
+                AND i.userId = #{userId}
+                AND i.status = 1) as isUnLiked
+            </when>
+        </choose>
+    </select>
+    <select id="queryCommentChildren" resultType="app.pojo.Comment">
+        SELECT lb.*
+        FROM lb_comments lb
+        WHERE root_id = #{id}
+        OR parent_id = #{id}
+    </select>
+
+    <update id="like">
+        UPDATE lb_comment_info SET status =0
+        WHERE comment_id= #{id} AND userId= #{cardId}
+    </update>
+
+    <insert id="insertLike">
+        INSERT INTO lb_comment_info (SELECT #{id} as comment_id ,#{userId} as userId ,0 as
+        status FROM DUAL WHERE NOT exists(SELECT 1 FROM lb_comment_info lci WHERE lci.comment_id
+        = #{id} AND lci.userId = #{userId}))
+    </insert>
+
+    <insert id="insertUnLike">
+        INSERT INTO lb_comment_info (SELECT #{id} as comment_id ,#{userId} as userId ,1 as
+        status FROM DUAL WHERE NOT exists(SELECT 1 FROM lb_comment_info lci WHERE lci.comment_id
+        = #{id} AND lci.userId = #{userId}))
+    </insert>
+
+    <update id="unLike">
+        UPDATE lb_comment_info SET status = 1
+        WHERE comment_id= #{id} AND userId= #{userId}
+    </update>
+
+    <update id="cancelLike">
+        UPDATE lb_comment_info SET status = -1
+        WHERE comment_id= #{id} AND userId= #{userId}
+    </update>
+</mapper>

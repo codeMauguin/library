@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="app.dao.AdminDao">
+    <update id="updateUserTotal">
+        UPDATE lb_card
+        SET total = #{total}
+        WHERE userId = #{id}
+        AND #{total} > borrowed
+    </update>
+    <select id="getAllUser" resultType="app.pojo.Admin_user">
+        SELECT l.id, l.name, l.permissions, lc.id as cardId, lc.borrowed, lc.total
+        FROM lb_user l
+        LEFT JOIN lb_card lc ON lc.userId = l.id
+        <choose>
+            <when test="pageInfo.id != null">
+                WHERE l.id > #{pageInfo.id}
+                ORDER BY l.id
+                LIMIT #{pageInfo.pageSize}
+            </when>
+            <otherwise>
+                ORDER BY l.id
+                LIMIT
+                #{pageInfo.offset}
+                ,
+                #{pageInfo.pageSize}
+            </otherwise>
+        </choose>
+    </select>
+    <select id="getAllUser_size" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM lb_user
+    </select>
+
+    <update id="pull">
+        UPDATE lb_account
+        SET status = #{status}
+        WHERE id = #{id}
+        AND (SELECT 1 FROM lb_user lu WHERE lu.id = #{id} AND lu.permissions != "admin")
+    </update>
+
+    <update id="updateUserRole">
+        UPDATE lb_user
+        SET permissions = #{notSafe}
+        WHERE id = #{id}
+    </update>
+</mapper>

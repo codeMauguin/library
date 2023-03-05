@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="app.dao.AdminOrderDao">
+    <update id="updateBorrowed">
+        UPDATE lb_borrow
+        SET status = #{state}
+        <choose>
+            <when test="returnTime != null">
+                ,returnTime = #{returnTime}
+            </when>
+        </choose>
+        WHERE id = #{id}
+    </update>
+    <select id="queryAll_Size" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM lb_borrow
+        WHERE status != -2
+    </select>
+    <select id="queryAll" resultType="app.pojo.AdminBorrowedTable">
+        SELECT lb.id, lb.status, lb.book_id, lo.card_id
+        FROM lb_borrow lb
+        LEFT JOIN lb_order lo on lo.id = lb.order_id
+        WHERE lb.status != -2
+        <choose>
+            <when test="pageInfo.id == null">
+                ORDER BY lb.id
+                LIMIT #{pageInfo.offset},#{pageInfo.pageSize}
+            </when>
+            <otherwise>
+                AND lb.id > #{pageInfo.id}
+                ORDER BY lb.id
+                LIMIT #{pageInfo.pageSize}
+            </otherwise>
+        </choose>
+    </select>
+    <select id="getBorrowed" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM lb_borrow lb
+        WHERE lb.status = 0
+        AND lb.order_id =
+        (SELECT order_id FROM lb_order lo WHERE lo.card_id = #{id} AND lo.id = lb.order_id)
+    </select>
+    <select id="getOne" resultType="app.pojo.AdminBorrowedTable">
+        SELECT lo.card_id, book_id
+        FROM lb_borrow lb
+        LEFT JOIN lb_order lo on lo.id = lb.order_id
+        WHERE lb.id = #{id}
+    </select>
+</mapper>

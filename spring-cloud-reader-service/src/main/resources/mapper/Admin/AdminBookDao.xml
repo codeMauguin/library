@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="app.dao.AdminBookDao">
+    <insert id="insert">
+        INSERT INTO lb_book (id, name, category, author, press, info, image, state, time)
+        VALUES (#{book.id}, #{book.name}, #{book.category}, #{book.author}, #{book.press},
+                #{book.info}, 'https://i.postimg.cc/d3n4mpfs/image24.jpg', 0, NOW())
+    </insert>
+    <insert id="initStock">
+        INSERT INTO lb_inventory (bookId, total, borrowed)
+        VALUES (#{inventory.bookId}, #{inventory.total}, 0)
+    </insert>
+    <update id="updateStock" flushCache="true">
+        UPDATE lb_inventory
+        SET total = #{stock}
+        WHERE bookId = #{id}
+          AND #{stock} > borrowed
+    </update>
+    <update id="updateBook" flushCache="true">
+        UPDATE lb_book lb
+        <set>
+            <if test="book.name != null">
+                lb.name = #{book.name},
+            </if>
+            <if test="book.category != null">
+                lb.category= #{book.category},
+            </if>
+            <if test="book.author != null">
+                lb.author= #{book.author},
+            </if>
+            <if test="book.press != null">
+                lb.press = #{book.press},
+            </if>
+            <if test="book.info != null">
+                lb.info= #{book.info}
+            </if>
+        </set>
+        WHERE lb.id = #{book.id}
+    </update>
+</mapper>

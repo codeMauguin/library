@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1:8848
+        prefix: gateway
+        file-extension: yaml
+        extension-configs:
+          - data-id: gateway
+            refresh: true
+            group: DEFAULT_GROUP
+      discovery:
+        server-addr: 127.0.0.1:8848 #Nacos地址

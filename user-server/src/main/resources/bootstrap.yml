@@ -1,0 +1,14 @@
+spring:
+  cloud:
+    openfeign:
+      httpclient:
+        enabled: true
+    nacos:
+      config:
+        server-addr: 127.0.0.1:8848
+        prefix: server
+        file-extension: yaml
+        extension-configs:
+          - data-id: server
+            refresh: true
+            group: DEFAULT_GROUP

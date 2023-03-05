@@ -1,0 +1,28 @@
+server:
+  port: 8050
+
+
+spring:
+  application:
+    name: order
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+        extension-configs:
+          - data-id: server
+            refresh: true
+            group: DEFAULT_GROUP
+        prefix: server
+        file-extension: yaml
+    openfeign:
+      httpclient:
+        enabled: true
+  datasource:
+    druid:
+      url: jdbc:mysql://127.0.0.1:3306/library_order?autoReconnect=true&failOverReadOnly=false&rewriteBatchedStatements=true
+logging:
+  level:
+    app:
+      dao: debug

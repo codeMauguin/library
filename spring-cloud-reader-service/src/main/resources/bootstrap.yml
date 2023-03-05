@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: reader-service
+  cloud:
+    nacos:
+      config:
+        server-addr: 127.0.0.1:8848
+        prefix: server
+        file-extension: yaml
+        extension-configs:
+          - data-id: server
+            refresh: true
+            group: DEFAULT_GROUP
+      discovery:
+        namespace: public
+      server-addr: 127.0.0.1:8848
+
+logging:
+  level:
+    app:
+      dao: debug

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="app.dao.BookDao">
+    <update id="deductionOfInventory">
+        UPDATE lb_inventory
+        SET borrowed = borrowed + 1
+        WHERE bookId = #{bookId}
+          AND total > borrowed
+    </update>
+    <update id="incrementOfInventory">
+        UPDATE lb_inventory
+        SET borrowed = borrowed - 1
+        WHERE bookId = #{bookId}
+          AND borrowed > 0
+    </update>
+    <select id="getBookSize" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM lb_book
+        <choose>
+            <when test="isReader">
+                WHERE state = 0
+            </when>
+        </choose>
+    </select>
+
+    <resultMap id="book" type="app.pojo.Book" autoMapping="true">
+        <id column="id" javaType="java.lang.Long" property="id"/>
+        <association property="inventory" autoMapping="true"/>
+    </resultMap>
+
+    <select id="getBooks" resultMap="book">
+        SELECT
+        l.*,
+        li.*
+        FROM lb_book l
+        left join lb_inventory li on l.id = li.bookId
+        <choose>
+            <when test="pageInfo.id != null">
+                WHERE l.id > #{pageInfo.id}
+                LIMIT #{pageInfo.pageSize}
+            </when>
+            <otherwise>
+                LIMIT #{pageInfo.offset},#{pageInfo.pageSize}
+            </otherwise>
+        </choose>
+
+    </select>
+    <select id="getBook" resultMap="book">
+        SELECT l.*,
+               li.*
+        FROM lb_book l
+                 left join lb_inventory li on l.id = li.bookId
+        WHERE l.id = #{bookId}
+    </select>
+    <select id="getBookStock" resultType="java.lang.Integer">
+        SELECT (li.total - li.borrowed)
+        FROM lb_inventory li WHERE
+        li.bookId IN
+        <foreach collection="bookIds" open="(" close=")" separator=","
+                 item="item">
+            #{item}
+        </foreach>
+    </select>
+    <select id="queryBookName" resultType="java.lang.String">
+        SELECT
+        <choose>
+            <when test='condition == "bookId"'>
+                id
+            </when>
+            <when test='condition == "bookName"'>
+                name
+            </when>
+            <otherwise>
+                author
+            </otherwise>
+        </choose>
+        FROM lb_book lb
+        WHERE
+        <choose>
+            <when test='condition == "bookId"'>
+                id LIKE concat('%',#{keyword,jdbcType=VARCHAR},'%')
+            </when>
+            <otherwise>
+                MATCH(
+                <choose>
+                    <when test='condition == "bookName"'>
+                        name
+                    </when>
+                    <otherwise>
+                        author
+                    </otherwise>
+                </choose>
+                ) against (#{keyword,jdbcType=VARCHAR})
+            </otherwise>
+        </choose>
+        ;
+    </select>
+    <select id="getBooksBySearch" resultMap="book">
+        SELECT l.*,
+        li.*
+        FROM lb_book l
+        left join lb_inventory li on l.id = li.bookId
+        WHERE
+        <choose>
+            <when test='mode == "bookId"'>
+                id LIKE concat('%',#{search,jdbcType=VARCHAR},'%')
+            </when>
+            <otherwise>
+                MATCH(
+                <choose>
+                    <when test='mode == "bookName"'>
+                        name
+                    </when>
+                    <otherwise>
+                        author
+                    </otherwise>
+                </choose>
+                ) against (#{search,jdbcType=VARCHAR})
+            </otherwise>
+        </choose>
+        ;
+    </select>
+    <select id="queryBookNameOne" resultType="java.lang.String">
+        SELECT name
+        FROM lb_book
+        WHERE id = #{bookId}
+    </select>
+</mapper>

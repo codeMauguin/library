@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="MyBatisCodeHelperDatasource">
+    <option name="projectProfile">
+      <ProjectProfile>
+        <option name="baseClassSearchXml" value="true" />
+        <option name="mapperFilesFolder" value="$PROJECT_DIR$/lb-order/src/main/resources/mapper" />
+        <option name="mapperFilesFolderList">
+          <list>
+            <option value="$PROJECT_DIR$/lb-order/src/main/resources/mapper" />
+          </list>
+        </option>
+        <option name="supportIncludeWithBinds" value="true" />
+        <option name="supportSqlSessionSelect" value="true" />
+      </ProjectProfile>
+    </option>
+  </component>
+</project>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="app.dao.UserDao">
+    <update id="deductionOfBorrowed">
+        UPDATE lb_card
+        SET borrowed = (borrowed + #{size})
+        WHERE userId = #{userId}
+        AND total >= (borrowed + #{size})
+    </update>
+    <select id="queryByIdOrName" resultType="app.pojo.User">
+        SELECT id, name, permissions
+        FROM lb_user
+        WHERE
+        <choose>
+            <when test="id != null">
+                id=#{id}
+            </when>
+            <otherwise>
+                name=#{name}
+            </otherwise>
+        </choose>
+    </select>
+    <select id="queryById" resultType="pojo.user">
+        SELECT id, name, image
+        FROM lb_user
+        WHERE id = #{id}
+    </select>
+    <select id="queryCardById" resultType="app.pojo.UserCard">
+        SELECT id, total, borrowed, 0 as timeout
+        FROM lb_card lc
+        WHERE lc.userId = #{id}
+    </select>
+    <select id="queryCardId" resultType="java.lang.Long">
+        SELECT id
+        FROM lb_card lu
+        WHERE lu.userId = #{id}
+    </select>
+    <select id="queryUser" resultType="pojo.user">
+        SELECT id, name
+        FROM lb_user lu
+        WHERE lu.id = (select userId from lb_card WHERE id = #{cardId})
+    </select>
+
+    <update id="revise">
+        UPDATE lb_user
+        SET name = #{name}
+        WHERE id = #{id}
+    </update>
+
+    <select id="query" resultType="app.pojo.Backer">
+        SELECT la.id, la.status,lu.name
+        FROM lb_account la
+        LEFT JOIN lb_user lu ON la.id = lu.id
+        WHERE lu.permissions != "admin"
+        <choose>
+            <when test="status != null">
+                AND la.status = #{status}
+            </when>
+        </choose>
+        LIMIT #{pageInfo.offset},#{pageInfo.pageSize}
+    </select>
+
+    <select id="query_size" resultType="java.lang.Integer">
+        SELECT COUNT(la.id)
+        FROM lb_account la
+        LEFT JOIN lb_user lu ON la.id = lu.id
+        WHERE lu.permissions != "admin"
+        <choose>
+            <when test="status != null">
+                AND la.status = #{status}
+            </when>
+        </choose>
+        LIMIT #{pageInfo.offset},#{pageInfo.pageSize}
+    </select>
+</mapper>

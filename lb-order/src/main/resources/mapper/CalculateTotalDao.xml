@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="app.dao.CalculateTotalDao">
+    <select id="getReturnCount" resultType="app.pojo.TodayReturn">
+        SELECT (SELECT COUNT(lb.id)
+                FROM lb_borrow lb
+                WHERE lb.status = 1
+                  AND DATEDIFF(lb.returnTime, NOW()) = 0)  as count,
+               (SELECT COUNT(lb.id)
+                FROM lb_borrow lb
+                WHERE lb.status = 1
+                  AND DATEDIFF(lb.returnTime, NOW()) = -1) as yesterday
+    </select>
+    <select id="getBorrowedCount" resultType="app.pojo.TodayBorrowed">
+        SELECT (SELECT COUNT(lb.id)
+                FROM lb_borrow lb
+                WHERE lb.status = 0
+                  AND DATEDIFF(lb.create_time, NOW()) = 0)  as count,
+               (SELECT COUNT(lb.id)
+                FROM lb_borrow lb
+                WHERE lb.status = 0
+                  AND DATEDIFF(lb.create_time, NOW()) = -1) as yesterday
+    </select>
+    <select id="getTotalOrder" resultType="app.pojo.TotalOrder">
+        SELECT (SELECT COUNT(lb.id)
+                FROM lb_borrow lb
+                WHERE lb.status = 0
+                  AND DATEDIFF(lb.returnTime, NOW()) >= 0)
+                                                                               as count,
+               (SELECT COUNT(lb.id)
+                FROM lb_borrow lb
+                WHERE lb.status = -1
+                   OR (lb.status = 0 AND DATEDIFF(lb.returnTime, NOW()) = -1)) as timeout
+    </select>
+    <select id="query_statistic_time" resultType="app.pojo.StatisticStatus">
+        SELECT MONTH(create_time) month, COUNT(*) as borrowed
+        FROM lb_borrow lb
+        WHERE YEAR(create_time) = #{year}
+        GROUP BY MONTH(create_time)
+    </select>
+    <select id="query_statistic_return" resultType="app.pojo.StatisticStatus">
+        SELECT MONTH(returnTime) month, COUNT(*) as borrowed
+        FROM lb_borrow lb
+        WHERE YEAR(returnTime) = #{year}
+        AND lb.status = 1
+        GROUP BY MONTH(returnTime)
+    </select>
+
+    <select id="getReaderBorrowed" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM lb_borrow lb
+        WHERE (lb.status = 0 AND DATEDIFF(lb.returnTime,
+        NOW()) >= 0)
+        AND lb.order_id IN (SELECT id FROM lb_order lo WHERE lo.card_id = #{query})
+    </select>
+
+    <select id="getReaderTimeout" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM lb_borrow lb
+        WHERE (lb.status = -1 OR (lb.status = 0 AND 0>DATEDIFF(lb.returnTime,NOW())))
+        AND lb.order_id IN (SELECT id FROM lb_order lo WHERE lo.card_id = #{query})
+    </select>
+
+
+    <select id="getTheMostRecentBorrowingTime" resultType="app.pojo.BorrowedTable">
+        SELECT lb.returnTime,lb.book_id
+        FROM lb_borrow lb
+        WHERE (lb.status = 0 AND DATEDIFF(lb.returnTime,
+        NOW()) >= 0)
+        AND lb.order_id IN (SELECT id FROM lb_order lo WHERE lo.card_id = #{query})
+        ORDER BY lb.returnTime Limit 1
+    </select>
+
+    <select id="getTheMostRecentTimeOutTime" resultType="app.pojo.BorrowedTable">
+        SELECT lb.returnTime,lb.book_id
+        FROM lb_borrow lb
+        WHERE (lb.status = -1 OR (lb.status = 0 AND 0>DATEDIFF(lb.returnTime,NOW())))
+        AND lb.order_id IN (SELECT id FROM lb_order lo WHERE lo.card_id = #{query})
+        ORDER BY lb.returnTime Limit 1
+    </select>
+
+    <select id="getReaderHistoryBorrowed" resultType="java.lang.Integer">
+        SELECT COUNT(id) FROM lb_borrow lb WHERE lb.status = 1 AND lb.order_id IN (SELECT id FROM
+        lb_order lo WHERE lo.card_id = #{query})
+    </select>
+</mapper>

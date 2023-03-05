@@ -1,0 +1,178 @@
+.my_seach_btn {
+    position: relative;
+    width: 150px;
+    height: 40px;
+    overflow: hidden;
+    border: 1px solid black;
+    border-radius: 50px;
+    padding-left: 35px;
+    -webkit-box-shadow: 2.9px 2.9px 2.2px rgba(0, 0, 0, 0.019),
+    5.2px 5.2px 5.3px rgba(0, 0, 0, 0.023),
+    7px 7px 10px rgba(0, 0, 0, 0.025),
+    8.7px 8.7px 17.9px rgba(0, 0, 0, 0.024),
+    11.3px 11.3px 33.4px rgba(0, 0, 0, 0.023),
+    20px 20px 80px rgba(0, 0, 0, 0.02);
+    box-shadow: 2.9px 2.9px 2.2px rgba(0, 0, 0, 0.019),
+    5.2px 5.2px 5.3px rgba(0, 0, 0, 0.023),
+    7px 7px 10px rgba(0, 0, 0, 0.025),
+    8.7px 8.7px 17.9px rgba(0, 0, 0, 0.024),
+    11.3px 11.3px 33.4px rgba(0, 0, 0, 0.023),
+    20px 20px 80px rgba(0, 0, 0, 0.02);
+}
+
+.pika {
+    position: absolute;
+    top: -100%;
+    left: 42%;
+    -webkit-transition: 0.5s all;
+    transition: 0.5s all;
+    -webkit-animation: tilt 1.1s infinite ease-in-out;
+    animation: tilt 1.1s infinite ease-in-out;
+}
+
+@-webkit-keyframes tilt {
+    0% {
+        -webkit-transform: translate(-50%, -50%) rotate(0deg);
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    50% {
+        -webkit-transform: translate(-50%, -50%) rotate(10deg);
+        transform: translate(-50%, -50%) rotate(10deg);
+    }
+
+    100% {
+        -webkit-transform: translate(-50%, -50%) rotate(0deg);
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+}
+
+@keyframes tilt {
+    0% {
+        -webkit-transform: translate(-50%, -50%) rotate(0deg);
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    50% {
+        -webkit-transform: translate(-50%, -50%) rotate(10deg);
+        transform: translate(-50%, -50%) rotate(10deg);
+    }
+
+    100% {
+        -webkit-transform: translate(-50%, -50%) rotate(0deg);
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+}
+
+.pokeball {
+    position: absolute;
+    top: 25%;
+    left: 10%;
+    -webkit-animation: rotate_4991 1s linear infinite;
+    animation: rotate_4991 1s linear infinite;
+}
+
+@-webkit-keyframes rotate_4991 {
+    0% {
+        -webkit-transform: rotate(0);
+        transform: rotate(0);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rotate_4991 {
+    0% {
+        -webkit-transform: rotate(0);
+        transform: rotate(0);
+    }
+
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}
+
+.my_seach_btn:hover .pika {
+    top: 90%;
+}
+
+.my_seach_btn:hover .pokeball {
+    -webkit-animation: none;
+    animation: none;
+    -webkit-transform: scale(0);
+    -ms-transform: scale(0);
+    transform: scale(0);
+}
+
+.my_seach_btn:hover .go {
+    color: transparent;
+}
+
+.go {
+    position: absolute;
+    top: 18%;
+    left: 45%;
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.pword, .pword2 {
+    position: absolute;
+    font-size: 13px;
+    opacity: 0;
+    -webkit-animation: pulse-animation_0011 1s infinite;
+    animation: pulse-animation_0011 1s infinite;
+}
+
+@-webkit-keyframes pulse-animation_0011 {
+    0% {
+        -webkit-transform: rotateZ(-30deg) scale(1);
+        transform: rotateZ(-30deg) scale(1);
+    }
+
+    50% {
+        -webkit-transform: rotateZ(-30deg) scale(1.1);
+        transform: rotateZ(-30deg) scale(1.1);
+    }
+
+    100% {
+        -webkit-transform: rotateZ(-30deg) scale(1);
+        transform: rotateZ(-30deg) scale(1);
+    }
+}
+
+@keyframes pulse-animation_0011 {
+    0% {
+        -webkit-transform: rotateZ(-30deg) scale(1);
+        transform: rotateZ(-30deg) scale(1);
+    }
+
+    50% {
+        -webkit-transform: rotateZ(-30deg) scale(1.1);
+        transform: rotateZ(-30deg) scale(1.1);
+    }
+
+    100% {
+        -webkit-transform: rotateZ(-30deg) scale(1);
+        transform: rotateZ(-30deg) scale(1);
+    }
+}
+
+.pword {
+    top: 30%;
+    left: 72%;
+}
+
+.pword2 {
+    top: 55%;
+    left: 75%;
+}
+
+.my_seach_btn:hover .pword, .my_seach_btn:hover .pword2 {
+    opacity: 1;
+}

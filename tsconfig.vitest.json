@@ -1,0 +1,12 @@
+{
+	"extends": "./tsconfig.app.json",
+	"exclude": [],
+	"compilerOptions": {
+		"target": "ESNext",
+		"composite": true,
+		"preserveValueImports": true,
+		"isolatedModules": true,
+		"lib": [],
+		"types": ["node", "jsdom"]
+	}
+}

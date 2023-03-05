@@ -1,0 +1,81 @@
+.my_del_btn {
+    width: 120px;
+    height:  40px;
+    cursor: pointer;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    background: red;
+    border: none;
+    border-radius: 5px;
+    -webkit-box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+    background: #e62222;
+}
+
+.my_del_btn, .my_del_btn span {
+    -webkit-transition: 200ms;
+    transition: 200ms;
+}
+
+.my_del_btn .text {
+    -webkit-transform: translateX(35px);
+    -ms-transform: translateX(35px);
+    transform: translateX(35px);
+    color: white;
+    font-weight: bold;
+}
+
+.my_del_btn .icon {
+    position: absolute;
+    border-left: 1px solid #c41b1b;
+    -webkit-transform: translateX(100px);
+    -ms-transform: translateX(100px);
+    transform: translateX(100px);
+    height: 40px;
+    width: 40px;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    display: none;
+}
+
+.my_del_btn svg {
+    width: 15px;
+    fill: #eee;
+}
+
+.my_del_btn:hover {
+    background: #ff3636;
+}
+
+.my_del_btn:hover .text {
+    color: transparent;
+}
+
+.my_del_btn:hover .icon {
+    width: 150px;
+    border-left: none;
+    -webkit-transform: translateX(-20px);
+    -ms-transform: translateX(-20px);
+    transform: translateX(-20px);
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+}
+
+.my_del_btn:focus {
+    outline: none;
+}
+
+.my_del_btn:active .icon svg {
+    -webkit-transform: scale(0.8);
+    -ms-transform: scale(0.8);
+    transform: scale(0.8);
+}

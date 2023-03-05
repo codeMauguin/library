@@ -1,0 +1,17 @@
+{
+	"extends": "@vue/tsconfig/tsconfig.web.json",
+	"include": ["env.d.ts", "src/**/*", "src/**/*.vue", "src/**/**.json"],
+	"exclude": ["src/**/__tests__/*"],
+	"compilerOptions": {
+		"lib": ["ESNext", "DOM"],
+		"preserveValueImports": false,
+		"isolatedModules": false,
+		"composite": true,
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["./src/*"]
+		},
+		"types": ["pinia-plugin-persist", "element-plus/global"],
+		"resolveJsonModule": true
+	}
+}

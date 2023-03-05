@@ -1,0 +1,37 @@
+{
+  "Authorization": {
+    "rules": [
+      [
+        "/reader/**",
+        2
+      ],
+      [
+        "/admin/**",
+        4
+      ],
+      [
+        "/user",
+        14
+      ],
+      [
+        "/main/**",
+        14
+      ]
+    ],
+    "login": [
+      "/user",
+      "/reader/**",
+      "/admin/**"
+    ],
+    "white": [
+      "/login",
+      "/reader/allBooks",
+      "/main",
+      "/book/**/"
+    ],
+    "authKey": {
+      "reader": 2,
+      "admin": 4
+    }
+  }
+}

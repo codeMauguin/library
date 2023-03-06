@@ -37,7 +37,6 @@
                 <el-empty
                         :description="`没有${normal&&blacklist?'':!normal&&!blacklist?'请选择一项条件':normal?'正常':'黑名单'}用户`"/>
             </template>
-            <el-table-column type="selection"/>
             <el-table-column label="用户编号" prop="id"/>
             <el-table-column label="用户姓名" prop="name"/>
             <el-table-column
@@ -92,16 +91,18 @@ type PrivateUser = Omit<user, "permissions">
 const pageInstance: PageInstance<PrivateUser> = new Page(new class implements LoadPage<PrivateUser> {
 	public async load(offset: number, pageSize: number, size: number, last?: PrivateUser):
 		Promise<PageData<PrivateUser>> {
-		return instance.get(AdminAPI.ALREADY_A, {params: {offset, pageSize, size}})
+		return instance.get(AdminAPI.ALREADY_A, {params: { offset, pageSize,
+                           size, isNormal: normal.value, isBlack: blacklist.value, searchId: searchId.value}})
 					   .then(({data: {data}}) => data);
 	}
 }());
 
 const EMPTY_PAGE = new LocalVirtualPage([], pageInstance.pageInfo);
-
-function search(){
-    IfStream.of(Assert.hasText(searchId.value)).then(filter).catch(throttle(()=>warning(''),500));
+const error=throttle(() => warning('输入搜索用户编号'), 500);
+function search() {
+	IfStream.of(Assert.hasText(searchId.value)).then(filter).catch(error);
 }
+
 function filter(): void {
 	
 	IfStream.of(!normal.value && !blacklist.value).then(() => {
@@ -138,7 +139,6 @@ function restoreInto(row: PrivateUser): void {
 				success("已恢复");
 			})
 			.catch((e) => {
-				console.log(e);
 				error("恢复失败");
 			});
 }
@@ -151,7 +151,6 @@ function pull(row: PrivateUser): void {
 				success("已拉黑");
 			})
 			.catch((e) => {
-				console.log(e);
 				warning("拉黑失败");
 			});
 }

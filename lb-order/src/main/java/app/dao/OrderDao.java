@@ -46,4 +46,6 @@ public interface OrderDao {
 	Boolean returnBook(@Param("id") Long id);
 	
 	Boolean checkBooksHasCreate(@Param("query") Long query, @Param("bookIds") List<Long> bookIds);
+	
+	void timeoutBorrowed(@Param("id") Long id);
 }

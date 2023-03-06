@@ -2,7 +2,6 @@ package app.service;
 
 import app.pojo.BorrowedTable;
 import app.pojo.order;
-import org.apache.ibatis.annotations.Param;
 import pojo.PageData;
 import pojo.PageInfo;
 
@@ -39,9 +38,29 @@ public interface OrderService {
 	
 	PageData<BorrowedTable> getBorrowed(PageInfo pageInfo, List<Integer> status, Long id);
 	
-	Boolean returnBook(@Param("id") Long id, @Param("userId") Long userId);
+	/**
+	 * “如果给定用户当前已签出图书，则返回具有给定 ID 的图书。”
+	 *
+	 * @param id     要归还的图书的 ID。
+	 * @param userId 归还图书的用户的用户 ID。
+	 * @return 一个布尔值。
+	 */
+	Boolean returnBook(Long id, Long userId);
 	
+	/**
+	 * 获取具有给定 userId 的用户借阅的所有书籍的列表。
+	 *
+	 * @param userId 用户的 ID。
+	 * @return 用户借阅的图书 ID 列表。
+	 */
 	List<Long> getHasBorrowed(Long userId);
 	
+	/**
+	 * 如果具有给定 userId 的用户已经借过这本书且这本书没有续签过，则续签这本书
+	 *
+	 * @param id  您要归还的图书的 ID。
+	 * @param cid 归还图书的用户的 ID。
+	 * @return 布尔值
+	 */
 	LocalDateTime renewal(Long id, Long cid);
 }

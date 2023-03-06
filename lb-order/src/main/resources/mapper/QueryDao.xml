@@ -52,7 +52,7 @@
                 </foreach>
             </when>
         </choose>
-        ORDER BY lb.create_time DESC, lb.status ASC
+        ORDER BY lb.create_time DESC, lb.status
         LIMIT #{pageInfo.offset},#{pageInfo.pageSize}
     </select>
     <select id="getBorrowedSize" resultType="java.lang.Integer">
@@ -74,17 +74,17 @@
     <select id="getBorrowed" resultType="app.pojo.BorrowedTable">
         SELECT lb.*
         FROM lb_borrow lb
-        LEFT JOIN lb_order lo on lo.id = lb.order_id
+                 LEFT JOIN lb_order lo on lo.id = lb.order_id
         WHERE lb.id = #{id}
-        AND lo.card_id = #{query}
+          AND lo.card_id = #{query}
     </select>
     <select id="getHasBorrowed" resultType="java.lang.Long">
         SELECT book_id
         FROM lb_borrow lb
-        LEFT JOIN lb_order lo on lo.id = lb.order_id
+                 LEFT JOIN lb_order lo on lo.id = lb.order_id
         WHERE lo.card_id = #{cardId}
-        AND lb.status = 0
-        AND lb.returnTime >= NOW()
+          AND lb.status = 0
+          AND lb.returnTime >= NOW()
     </select>
 
     <update id="renewal" keyProperty="table.returnTime" keyColumn="returnTime" flushCache="true">

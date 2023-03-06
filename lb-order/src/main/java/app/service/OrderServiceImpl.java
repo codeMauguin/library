@@ -203,7 +203,20 @@ public class OrderServiceImpl implements OrderService {
 		Long query = injectService.query(id);
 		state(query != null && query > 0, "查询card失败");
 		return PageData.response(pageInfo,
-				page -> queryDao.getBorrowers(page, status, query),
+				page -> {
+					List<BorrowedTable> borrowers = queryDao.getBorrowers(page, status, query);
+					// 检查是否超时
+					LocalDateTime now = LocalDateTime.now();
+					borrowers.forEach(borrowedTable -> {
+						if (borrowedTable.getStatus() == 0 && borrowedTable
+																	  .getReturnTime()
+																	  .isBefore(now)) {
+							orderDao.timeoutBorrowed(borrowedTable.getId());
+							borrowedTable.setStatus(-1);
+						}
+					});
+					return borrowers;
+				},
 				() -> queryDao.getBorrowedSize(status, query)
 								);
 	}

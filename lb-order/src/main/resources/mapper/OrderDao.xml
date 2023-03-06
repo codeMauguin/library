@@ -14,49 +14,54 @@
         UPDATE lb_order
         SET status = -1
         WHERE id = #{orderId}
-        AND status = 0
+          AND status = 0
     </update>
     <update id="finalOrder">
         UPDATE lb_order
-        SET status = 1
-        , reason = '订单完成'
-        , end_time = NOW()
+        SET status   = 1
+          , reason   = '订单完成'
+          , end_time = NOW()
         WHERE id = #{orderId}
-        AND status = -1
+          AND status = -1
     </update>
     <update id="failOrder">
         UPDATE lb_order lb
-        SET lb.status = IFNULL(#{ss}, -2)
-        , lb.reason = #{reason}
-        , lb.end_time = NOW()
+        SET lb.status   = IFNULL(#{ss}, -2)
+          , lb.reason   = #{reason}
+          , lb.end_time = NOW()
         WHERE id = #{orderId}
-        AND lb.status = -1
+          AND lb.status = -1
     </update>
     <update id="timeoutOrder">
         UPDATE lb_order
-        SET status = 4,
-        end_time = NOW()
+        SET status   = 4,
+            end_time = NOW()
         WHERE id = #{order}
     </update>
     <update id="updateBorrowed">
         UPDATE lb_borrow
-        SET status = #{status},
-        create_time = NOW()
+        SET status      = #{status},
+            create_time = NOW()
         WHERE book_id = #{bookId}
-        AND order_id = #{orderId}
+          AND order_id = #{orderId}
     </update>
     <update id="returnBook">
         UPDATE lb_borrow
-        SET status = 1,
-        returnTime = NOW()
+        SET status     = 1,
+            returnTime = NOW()
         WHERE id = #{id}
-        AND status = 0
+          AND status = 0
+    </update>
+    <update id="timeoutBorrowed">
+        UPDATE lb_borrow
+        SET status = -1
+        WHERE id = #{id}
     </update>
     <select id="queryBookIds" resultType="java.lang.Long">
         SELECT book_id
         FROM lb_borrow
         WHERE order_id = #{orderId}
-        AND status = -2
+          AND status = -2
     </select>
 
     <select id="checkBooksHasCreate" resultType="java.lang.Boolean">

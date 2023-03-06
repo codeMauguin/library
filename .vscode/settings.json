@@ -1,9 +1,0 @@
-{
-	"todo-tree.tree.showCountsInTree": false,
-	"typescript.tsdk": "node_modules/typescript/lib",
-	"vue3snippets.enable-compile-vue-file-on-did-save-code": false,
-	"commentTranslate.source": "DarkCWK.youdao-youdao",
-	"commentTranslate.multiLineMerge": false,
-	"docwriter.style": "Auto-detect",
-	"liveServer.settings.port": 8081
-}

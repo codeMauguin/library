@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite --port 80 --host",
     "build": "run-p type-check build-only",
-    "preview": "vite preview --port 8080",
+    "preview": "vite preview --port 80",
     "test:unit": "vitest --environment jsdom --root src/",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false"

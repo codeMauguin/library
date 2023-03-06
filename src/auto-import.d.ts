@@ -61,6 +61,7 @@ declare global {
   const isRef: typeof import('vue')['isRef']
   const isResponseOk: typeof import('./axios/index')['isResponseOk']
   const isSymbol: typeof import('./utils/Assert')['isSymbol']
+  const loadEl: typeof import('./utils/load')['loadEl']
   const map: typeof import('./types/CommentType')['map']
   const markRaw: typeof import('vue')['markRaw']
   const merge: typeof import('./utils/Arrays')['merge']

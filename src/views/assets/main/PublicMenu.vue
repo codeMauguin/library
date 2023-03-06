@@ -11,17 +11,13 @@
 					<span style="font-size: 19px">图书借阅系统</span>
 				</div>
 				<div class="header-center">
-					<el-icon
-							class="header-aside"
-							style="margin-left: 10px"
-							@click="emits('closed')">
-						<i
-								v-if="props.data.isCollapse"
-								class="iconfont icon-zhankai"></i>
-						<i
-								v-else
-								class="iconfont icon-shouqi"></i>
-					</el-icon>
+
+            <label class="menuButton"  for="check">
+                <input id="check"   type="checkbox"  @click="emits('closed')">
+                <span class="top"></span>
+                <span class="mid"></span>
+                <span class="bot"></span>
+            </label>
 					<slot name="header"></slot>
 				</div>
 				<div class="header-user">
@@ -191,6 +187,7 @@ function logout(): void {
 </script>
 
 <style scoped>
+@import "@/views/css/check.css";
 
 .common-layout {
     height: 100vh;

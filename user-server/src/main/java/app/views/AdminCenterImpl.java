@@ -20,8 +20,10 @@ public class AdminCenterImpl implements AdminCenter {
 	}
 	
 	@Override
-	public RestResponse getUsersBack(PageInfo pageInfo, Integer status) {
-		return RestResponse.response(adminService.getUsersBack(pageInfo, status),
+	public RestResponse getUsersBack(PageInfo pageInfo, Boolean isNormal, Boolean isBlack,
+									 Long searchId) {
+		return RestResponse.response(adminService.getUsersBack(pageInfo, isNormal, isBlack,
+						searchId),
 				ResponseCode.SUCCESS);
 	}
 	

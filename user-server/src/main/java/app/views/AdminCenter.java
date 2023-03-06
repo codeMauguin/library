@@ -5,10 +5,7 @@ import app.annotation.CheckRole;
 import app.annotation.JsonResponse;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import pojo.PageInfo;
 
 @Validated
@@ -18,7 +15,10 @@ public interface AdminCenter {
 	RestResponse getUsers(@NotNull PageInfo pageInfo);
 	
 	@GetMapping("/account/all")
-	RestResponse getUsersBack(@NotNull PageInfo pageInfo, Integer status);
+	RestResponse getUsersBack(@NotNull PageInfo pageInfo,
+							  @RequestParam(defaultValue = "true") Boolean isNormal,
+							  @RequestParam(defaultValue = "true") Boolean isBlack,
+							  Long searchId);
 	
 	@PatchMapping("/api/user/total")
 	@JsonResponse

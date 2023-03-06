@@ -12,7 +12,9 @@ public interface AdminService {
 	
 	Boolean pullIntoTheBlacklist(Long id);
 	
-	PageData<Backer> getUsersBack(PageInfo pageInfo, Integer status);
+	PageData<Backer> getUsersBack(PageInfo pageInfo, Boolean isNormal,
+								  Boolean isBlack,
+								  Long searchId);
 	
 	Boolean restoreInto(Long id);
 }

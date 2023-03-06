@@ -6,7 +6,7 @@
         UPDATE lb_card
         SET borrowed = (borrowed + #{size})
         WHERE userId = #{userId}
-        AND total >= (borrowed + #{size})
+          AND total >= (borrowed + #{size})
     </update>
     <select id="queryByIdOrName" resultType="app.pojo.User">
         SELECT id, name, permissions
@@ -51,26 +51,52 @@
     <select id="query" resultType="app.pojo.Backer">
         SELECT la.id, la.status,lu.name
         FROM lb_account la
-        LEFT JOIN lb_user lu ON la.id = lu.id
-        WHERE lu.permissions != "admin"
-        <choose>
-            <when test="status != null">
-                AND la.status = #{status}
-            </when>
-        </choose>
+        INNER JOIN lb_user lu ON la.id = lu.id
+        <where>
+            <if test="true">
+                lu.permissions != 'admin'
+            </if>
+            <if test="searchId">
+                AND la.id like CONCAT('%',#{searchId},'%')
+            </if>
+            <choose>
+                <when test="isNormal &amp;&amp; isBlack">
+                    AND (la.status = 0 OR la.status = 1)
+                </when>
+                <when test="isNormal">
+                    AND la.status = 0
+                </when>
+                <otherwise>
+                    AND la.status = 1
+                </otherwise>
+            </choose>
+        </where>
         LIMIT #{pageInfo.offset},#{pageInfo.pageSize}
     </select>
 
     <select id="query_size" resultType="java.lang.Integer">
         SELECT COUNT(la.id)
         FROM lb_account la
-        LEFT JOIN lb_user lu ON la.id = lu.id
-        WHERE lu.permissions != "admin"
-        <choose>
-            <when test="status != null">
-                AND la.status = #{status}
-            </when>
-        </choose>
+        INNER JOIN lb_user lu ON la.id = lu.id
+        <where>
+            <if test="true">
+                lu.permissions != 'admin'
+            </if>
+            <if test="searchId">
+                AND la.id like CONCAT('%',#{searchId},'%')
+            </if>
+            <choose>
+                <when test="isNormal &amp;&amp; isBlack">
+                    AND (la.status = 0 OR la.status = 1)
+                </when>
+                <when test="isNormal">
+                    AND la.status = 0
+                </when>
+                <otherwise>
+                    AND la.status = 1
+                </otherwise>
+            </choose>
+        </where>
         LIMIT #{pageInfo.offset},#{pageInfo.pageSize}
     </select>
 </mapper>

@@ -55,10 +55,13 @@ public class AdminServiceImpl implements AdminService {
 	}
 	
 	@Override
-	public PageData<Backer> getUsersBack(PageInfo pageInfo, Integer status) {
+	public PageData<Backer> getUsersBack(PageInfo pageInfo, Boolean isNormal, Boolean isBlack,
+										 Long searchId) {
 		return PageData
-					   .response(pageInfo, (page) -> accountService.query(page, status),
-							   () -> accountService.query_size(pageInfo, status));
+					   .response(pageInfo, (page) -> accountService.query(page, isNormal, isBlack,
+									   searchId),
+							   () -> accountService.query_size(pageInfo, isNormal, isBlack,
+									   searchId));
 	}
 	
 	@Override

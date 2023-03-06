@@ -40,7 +40,11 @@ public interface UserDao {
 	
 	Boolean revise(@Param("name") String name, @Param("id") Long id);
 	
-	List<Backer> query(@Param("pageInfo") PageInfo pageInfo, @Param("status") Integer status);
+	List<Backer> query(@Param("pageInfo") PageInfo pageInfo, @Param("isNormal") Boolean isNormal,
+					   @Param("isBlack") Boolean isBlack,
+					   @Param("searchId") Long searchId);
 	
-	Integer query_size(@Param("pageInfo") PageInfo pageInfo, @Param("status") Integer status);
+	Integer query_size(@Param("pageInfo") PageInfo pageInfo, @Param("isNormal") Boolean isNormal,
+					   @Param("isBlack") Boolean isBlack,
+					   @Param("searchId") Long searchId);
 }

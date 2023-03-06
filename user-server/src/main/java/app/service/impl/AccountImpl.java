@@ -144,12 +144,14 @@ public class AccountImpl implements AccountService {
 	}
 	
 	@Override
-	public List<Backer> query(PageInfo pageInfo, Integer status) {
-		return userDao.query(pageInfo, status);
+	public List<Backer> query(PageInfo pageInfo, Boolean isNormal, Boolean isBlack,
+							  Long searchId) {
+		return userDao.query(pageInfo, isNormal, isBlack, searchId);
 	}
 	
 	@Override
-	public Integer query_size(PageInfo pageInfo, Integer status) {
-		return userDao.query_size(pageInfo, status);
+	public Integer query_size(PageInfo pageInfo, Boolean isNormal, Boolean isBlack,
+							  Long searchId) {
+		return userDao.query_size(pageInfo, isNormal, isBlack, searchId);
 	}
 }

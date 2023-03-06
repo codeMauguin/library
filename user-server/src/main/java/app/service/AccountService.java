@@ -31,8 +31,10 @@ public interface AccountService {
 	
 	void logout(Long id);
 	
-	List<Backer> query(PageInfo pageInfo, Integer status);
+	List<Backer> query(PageInfo pageInfo, Boolean isNormal, Boolean isBlack,
+					   Long searchId);
 	
-	Integer query_size(PageInfo pageInfo, Integer status);
+	Integer query_size(PageInfo pageInfo, Boolean isNormal, Boolean isBlack,
+					   Long searchId);
 	
 }

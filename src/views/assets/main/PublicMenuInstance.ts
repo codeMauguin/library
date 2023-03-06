@@ -10,6 +10,8 @@ export type ElMenu = {
 	text: string;
 	index: string;
 	children?: Array<ElMenu>;
+	
+	el?: string;
 };
 
 export default PublicMenuInstance;

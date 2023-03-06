@@ -78,6 +78,7 @@ export class Assert {
 	public static isString(target: unknown): boolean {
 		return Assert.notNull(target) && typeof target === "string";
 	}
+	
 }
 
 /**

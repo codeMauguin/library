@@ -1,15 +1,18 @@
-import { ElLoading } from "element-plus";
-import type { Ref }  from "vue";
+import { ElLoading }            from "element-plus";
+import type { Ref, ShallowRef } from "vue";
 
 
 const el: Ref<string> = shallowRef<string>("document.body");
+const cur: ShallowRef<any> = shallowRef([]);
 
 export function loadEl(els: string): void {
 	el.value = els;
 }
 
-export function closeLoading() {
-	ElLoading.service().close();
+export function closeLoading(): void {
+	while (!Assert.isEmpty(cur.value)) {
+		cur.value.shift().close();
+	}
 }
 
 export function start(option?: {
@@ -19,31 +22,33 @@ export function start(option?: {
 	customClass?: string,
 	autoClose?: boolean | number
 }): void {
-	if (option?.autoClose) {
-		if (typeof option.autoClose !== "number") {
-			option.autoClose = 3000;
+	IfStream.of(Assert.notNull(option?.autoClose)).then(() => {
+		if (typeof option?.autoClose !== "number") {
+			option!.autoClose = 3000;
 		}
+		cur.value.push(ElLoading.service({
+											 fullscreen : option?.fullscreen ?? true,
+											 text       : "",
+											 target     : option?.target ?? el.value,
+											 lock       : option?.lock,
+											 body       : true,
+											 background : "rgba(0, 0, 0, 0.7)",
+											 customClass: option?.customClass
+										 }));
 		setTimeout(() => {
-			ElLoading.service({
-								  fullscreen : option?.fullscreen ?? true,
-								  text       : "",
-								  target     : option?.target ?? el.value,
-								  lock       : option?.lock,
-								  body       : true,
-								  customClass: option?.customClass,
-								  background : "rgba(0, 0, 0, 0.7)"
-							  });
-		}, option.autoClose);
-		
-	} else {
-		ElLoading.service({
-							  fullscreen : option?.fullscreen ?? true,
-							  text       : "",
-							  target     : option?.target ?? el.value,
-							  lock       : option?.lock,
-							  body       : true,
-							  background : "rgba(0, 0, 0, 0.7)",
-							  customClass: option?.customClass
-						  });
-	}
+			closeLoading();
+		}, option?.autoClose);
+	}).catch(() => {
+		cur.value.push(ElLoading.service({
+											 fullscreen : option?.fullscreen ?? true,
+											 text       : "",
+											 target     : option?.target ?? el.value,
+											 lock       : option?.lock,
+											 body       : true,
+											 background : "rgba(0, 0, 0, 0.7)",
+											 customClass: option?.customClass
+										 }));
+	});
+	
+	
 }

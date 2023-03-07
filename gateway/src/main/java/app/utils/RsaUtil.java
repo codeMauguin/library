@@ -33,7 +33,7 @@ public class RsaUtil {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
+		return new byte[0];
 	}
 	
 	/**
@@ -64,17 +64,17 @@ public class RsaUtil {
 	 * @param PRIVATE_KEY 您在上一步中生成的私钥。
 	 * @return 解密后的数据。
 	 */
-	public static String decrypt(byte[] data, String PRIVATE_KEY) {
+	public static byte[] decrypt(byte[] data, String PRIVATE_KEY) {
 		try {
 			PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(base64.decode(PRIVATE_KEY));
 			KeyFactory keyFactory = KeyFactory.getInstance(KEY);
 			Cipher cipher = Cipher.getInstance(RSA);
 			cipher.init(Cipher.DECRYPT_MODE, keyFactory.generatePrivate(keySpec));
-			return send(data, cipher, 256).toString();
+			return send(data, cipher, 256).toByteArray();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
+		return new byte[0];
 	}
 	
 	

@@ -7,6 +7,8 @@
           <option value="bl" />
           <option value="proxy-rule" />
           <option value="proxy-id" />
+          <option value="RESPONSE_KEY" />
+          <option value="lb_1" />
         </set>
       </option>
     </inspection_tool>

@@ -22,7 +22,7 @@ public class CorsConfig {
 			"Access-Control-Allow-Methods"
 	};
 	private final String[] requestHeaders = {
-			"lb", "content-type"
+			"lb_2", "content-type", "lb_1", "RESPONSE_KEY"
 	};
 	
 	

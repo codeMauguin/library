@@ -1,6 +1,6 @@
 package app.filter;
 
-import app.utils.RsaUtil;
+import app.utils.AESUtil;
 import org.reactivestreams.Publisher;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -17,7 +17,10 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Optional;
+
+import static app.filter.TerminalSignalTokenGatewayFilterFactory.KEY;
 
 @Component
 public class ResponseSignalGatewayFilterFactory extends AbstractNameValueGatewayFilterFactory implements
@@ -39,13 +42,15 @@ public class ResponseSignalGatewayFilterFactory extends AbstractNameValueGateway
 								join.read(content);
 								DataBufferUtils.release(join);
 								if (content.length == 0) return dataBufferFactory.wrap(content);
-								// 进行加密编码
-								byte[] encode = RsaUtil.encode(RsaUtil.base64.encode(content),
-										TerminalSignalTokenGatewayFilterFactory.PUBLIC_KEY);
-								if (encode == null) {
+								List<String> strings =
+										response.getHeaders().get(KEY);
+								response.getHeaders().remove(KEY);
+								if (strings == null || strings.isEmpty()) {
 									super.getHeaders().setContentLength(content.length);
 									return dataBufferFactory.wrap(content);
 								}
+								byte[] encode = AESUtil.encryptECB(content,
+										strings.get(0));
 								super.getHeaders().setContentLength(encode.length);
 								
 								// 验证生成结果正确性

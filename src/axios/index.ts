@@ -62,13 +62,18 @@ const crypto = new JSEncrypt({default_key_size: "2048"});
 crypto.setPublicKey(publicKey);
 const config: AxiosRequestConfig = {
 	baseURL: HttpApi.BASEURL,
-	timeout: 10000
+	timeout: 10000,
+	lb     : true
 };
 
 const instance: AxiosInstance = axios.create(config);
 declare module "axios" {
 	interface InternalAxiosRequestConfig {
 		key: string;
+		lb: boolean;
+	}
+	
+	interface AxiosRequestConfig {
 		lb: boolean;
 	}
 }
@@ -82,11 +87,12 @@ const cacheInstance: CacheAxios = CacheAxios.create({
 																response.data.code);
 														}
 													});
+const err: (v:any) => Promise<never> = v=>Promise.reject(v);
 instance.interceptors.request.use(value => {
 	value.lb = value.lb ?? true;
-	return Assert.isNull(value.data) || !value.lb ? setKey(value) : encrypt(value);
+	return !value.lb ? value : Assert.isNull(value.data) ? setKey(value) : encrypt(value);
 	
-});
+},err);
 
 function setKey(value: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
 	value.key = CryptoJS.enc.Base64.stringify(CryptoJS.lib.WordArray.random(32)).slice(0, 16);
@@ -108,7 +114,6 @@ function encrypt(value: InternalAxiosRequestConfig) {
 function decrypt(key: string, value: AxiosResponse<any, any>): any {
 	try {
 		const k = CryptoJS.enc.Utf8.parse(key);
-		console.log(key);
 		value.data = JSON.parse(
 			CryptoJS.AES.decrypt(value.data, k, {mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7}).toString(
 				CryptoJS.enc.Utf8));
@@ -117,11 +122,10 @@ function decrypt(key: string, value: AxiosResponse<any, any>): any {
 	}
 	return value;
 }
-
 instance.interceptors.response.use(value => {
 	const {key, lb} = value.config;
 	return lb ? decrypt(key, value) : value;
-});
+}, err);
 
 
 /**
@@ -133,7 +137,7 @@ instance.interceptors.request.use(
 		const store = useUserInfoStore();
 		target.headers.lb_2 = store.token;
 		return target;
-	}
+	},err
 );
 instance.interceptors.response.use(
 	(
@@ -170,7 +174,7 @@ instance.interceptors.response.use((value: AxiosResponse<ResponseApi<unknown>>) 
 	const store = useUserInfoStore();
 	store.refreshToken(token);
 	return value;
-});
+}, err);
 
 
 /**

@@ -42,26 +42,27 @@
         </el-descriptions-item
         >
     </el-descriptions>
-    <el-alert
-            description="库存字段不存在时,设置初始库存为0"
-            show-icon
-            title="提示"
-            type="info"/>
-    <el-switch
-            v-model="errorStop"
-            active-text="异常停止上传,并回退"
-            inactive-text="异常忽略继续上传"/>
+    <blockquote class="blockquote" style="--block: #909399">库存字段不存在时,设置初始库存为0</blockquote>
+
+    <label for="temperature" style="display: flex;align-items: center;height: 40px;margin-bottom:10px;gap: 10px">
+        <span>配置:</span>
+     
+        <el-tooltip :content="errorStop?'异常中断':'异常继续上传'">
+            <input id="temperature" v-model="errorStop" class="ch"  name="temperature" type="checkbox"
+                   value="is_hot"
+            >
+        </el-tooltip>
+       <el-tooltip content="上传错误是否中断">
+           <el-button class="iconfont icon-tishi" text></el-button>
+       </el-tooltip>
+    </label>
     <el-upload
             ref="uploadRef"
             :beforeUpload="before"
-            :data="{errorStop}"
-            :headers="{'lb':userStore.token}"
+            :http-request="upload"
             :limit="1"
-            :onError="error"
-            :onProgress="progress"
-            :onSuccess="success"
-            accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-            action="http://localhost:8088/admin/book/excel"
+            :onError="errors"
+            :onSuccess="suc"
             class="upload-demo"
             drag>
         <div class="el-upload__text">
@@ -71,32 +72,20 @@
 </template>
 
 <script lang="ts" setup>
-import type ResponseApi from "@/axios/ResponseApi";
+import instance               from "@/axios";
+import type ResponseApi       from "@/axios/ResponseApi";
+import { LoadProgress }       from "@/components/loade";
+import { AxiosProgressEvent } from "axios";
 import {
-    LoadProgress
-}                       from "@/components/loade";
-import {
-    ElMessage, ElNotification, ElUpload, UploadFile, UploadFiles, type UploadInstance, UploadProgressEvent
-}                       from "element-plus";
-import type {
-    Ref
-}                       from "vue";
+    ElNotification, ElUpload, UploadFile, UploadFiles, type UploadInstance, UploadProgressEvent, UploadRequestOptions
+}                             from "element-plus";
+import type { Ref }           from "vue";
 
 const uploadRef = ref<UploadInstance>();
 const userStore = useUserInfoStore();
 
-function success(response: ResponseApi<number>, uploadFile: UploadFile, uploadFiles: UploadFiles) {
+function suc(response: ResponseApi<number>, uploadFile: UploadFile, uploadFiles: UploadFiles) {
 	uploadRef.value?.clearFiles();
-	if (response.code === 200 && response.data === 0) {
-		ElMessage.success({
-			grouping: true,
-			message : response.error
-		});
-	} else {
-		ElNotification.error({
-			message: errorStop.value ? "所有数据已回退" : `失败了${response.data}本数据`
-		});
-	}
 	LoadProgress.closed();
 }
 
@@ -104,8 +93,41 @@ function progress(evt: UploadProgressEvent) {
 	LoadProgress.progress((evt.loaded / evt.total) * 100);
 }
 
-function error() {
+function errors() {
+	uploadRef.value?.clearFiles();
+	ElNotification.error({
+							 message: "所有数据已回退"
+						 });
 	LoadProgress.closed();
+}
+
+function upload(options: UploadRequestOptions) {
+	const data = new FormData();
+	data.set("file", options.file, options.file.name);
+	data.set("errorStop", String(errorStop.value));
+	return instance.post(AdminAPI.BATCH_URL, data, {
+		lb: false, headers: {lb_1: true}, onUploadProgress(progressEvent:
+															   AxiosProgressEvent): void {
+			LoadProgress.progress((progressEvent.progress as number) * 100);
+		}
+	}).then(({data: {data: response, error}}) => {
+		if (response > 0) {
+			ElNotification.info({
+									title  : "添加图书",
+									message: `共失败${response}条数据`
+								});
+			return;
+		}
+		ElNotification.success({
+								   title  : "添加图书",
+								   message: error
+							   });
+	}).catch((e) => {
+		ElNotification.error({
+								 title  : "添加图书",
+								 message: "添加失败"
+							 });
+	});
 }
 
 function before() {
@@ -115,4 +137,5 @@ function before() {
 const errorStop: Ref<boolean> = ref<boolean>(true);
 </script>
 <style scoped>
+@import "@/views/css/check_1.css";
 </style>

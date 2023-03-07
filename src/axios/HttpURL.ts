@@ -46,5 +46,6 @@ export const AdminAPI = {
 	STATISTIC             : "/order/api/statistic",
 	STATISTIC_YEAR        : "/order/api/statistic/year",
 	PULL                  : "/user/api/pullIntoBackList",
-	restore               : "/user/api/restoreInto"
+	restore               : "/user/api/restoreInto",
+	BATCH_URL             : "/reader/api/upload"
 };

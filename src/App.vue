@@ -15,7 +15,7 @@ const getKey = () => {
 <template>
     <RouterView
             :key="getKey()"
-            style="min-width: 1000px"/>
+            style="min-width: 1000px;"/>
 </template>
 
 <style>

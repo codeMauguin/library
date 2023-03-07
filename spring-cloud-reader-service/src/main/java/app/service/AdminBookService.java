@@ -1,7 +1,9 @@
 package app.service;
 
+import Message.RestResponse;
 import app.pojo.Book;
 
+import java.io.InputStream;
 import java.util.List;
 
 
@@ -21,4 +23,6 @@ public interface AdminBookService {
 	Boolean updateBooks(Book book);
 	
 	List<Object> report();
+	
+	RestResponse batchUpload(InputStream inputStream, boolean equals);
 }

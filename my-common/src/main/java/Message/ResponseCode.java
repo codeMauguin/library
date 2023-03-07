@@ -14,7 +14,7 @@ public enum ResponseCode {
 	FAIL_COMMIT_ORDER(4001, "订单错误"),
 	PARAM_ERROR(3000, "参数错误"),
 	FAIL_COMMIT_COMMENT(4000, "评论失败"),
-	LOGIN_FAIL(2001, "用户名或者密码错误!!!"), FAIL_RENEWAL(5000, "续签次数不足");
+	LOGIN_FAIL(2001, "用户名或者密码错误!!!"), FAIL_RENEWAL(5000, "续签次数不足"), TIMEOUT(7000, "任务超时");
 	private final Integer code;
 	private String message;
 	

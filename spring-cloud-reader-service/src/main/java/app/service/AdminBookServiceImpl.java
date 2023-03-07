@@ -1,9 +1,12 @@
 package app.service;
 
+import Message.ResponseCode;
+import Message.RestResponse;
 import app.dao.AdminBookDao;
 import app.pojo.Book;
 import app.pojo.Inventory;
 import app.utils.SnowFlakeIdWorker;
+import com.alibaba.excel.EasyExcel;
 import org.apache.ibatis.executor.BatchResult;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.session.SqlSession;
@@ -13,11 +16,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.IntStream.of;
 import static java.util.stream.IntStream.range;
@@ -135,5 +142,25 @@ public class AdminBookServiceImpl implements AdminBookService {
 		// 统计日借阅数
 		//
 		return null;
+	}
+	
+	@Override
+	public RestResponse batchUpload(InputStream inputStream, boolean equals) {
+		SqlSession sqlSession = sqlSessionFactory.openSession(
+				ExecutorType.BATCH, false
+															 );
+		AtomicInteger atomicBoolean = new AtomicInteger();
+		CountDownLatch countDownLatch = new CountDownLatch(1);
+		EasyExcel.read(inputStream, Book.class,
+				new ExcelHandle(snowFlakeIdWorker, equals, sqlSession, atomicBoolean,
+						adminBookDao, countDownLatch)).head(Book.class).sheet().doRead();
+		try {
+			boolean await = countDownLatch.await(3, TimeUnit.SECONDS);
+			if (!await) return RestResponse.response(ResponseCode.TIMEOUT);
+			System.out.println(atomicBoolean.get());
+			return RestResponse.response(atomicBoolean.get(), ResponseCode.SUCCESS);
+		} catch (InterruptedException e) {
+			return RestResponse.response(ResponseCode.TIMEOUT);
+		}
 	}
 }

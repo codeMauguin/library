@@ -7,7 +7,7 @@ export class Assert {
 	 * @returns 如果目标为空或未定义，则返回目标。
 	 */
 	public static isNull(target: any): boolean {
-		return target === null || target === void 0;
+		return target === null || target === (void 0);
 	}
 	
 	public static isEmpty(target: any): boolean {

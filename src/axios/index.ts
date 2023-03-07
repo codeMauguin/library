@@ -1,25 +1,22 @@
 /** @format */
 
-import { decode }                                                                            from "@/Authorization/ICrypt";
 import HttpApi                                                                               from "@/axios/HttpURL";
 import type ResponseApi                                                                      from "@/axios/ResponseApi";
 import { publicKey }                                                                         from "@/config";
-import { privateKey }                                                                        from "@/config";
 import { useBookStore }                                                                      from "@/stores/BooksStore";
 import { useUserInfoStore }                                                                  from "@/stores/counter";
 import {
 	useReaderStore
 }                                                                                            from "@/stores/readerStore";
 import { error }                                                                             from "@/utils/Alert";
-import type { AxiosResponseHeaders }                                                         from "axios";
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import axios                                                                                 from "axios";
 import CacheAxios                                                                            from "axios-cache-data";
+import CryptoJS                                                                              from "crypto-js";
 import JSEncrypt                                                                             from "jsencrypt";
 import {
 	hex2b64
 }                                                                                            from "jsencrypt/lib/lib/jsbn/base64";
-
 
 function encryptUnicodeLong(val: string, encrypt: JSEncrypt) {
 	let k = encrypt.getKey();
@@ -63,29 +60,19 @@ function encryptUnicodeLong(val: string, encrypt: JSEncrypt) {
 
 const crypto = new JSEncrypt({default_key_size: "2048"});
 crypto.setPublicKey(publicKey);
-const descriptor = new JSEncrypt({default_key_size: "2048", log: true});
-descriptor.setPrivateKey(privateKey);
 const config: AxiosRequestConfig = {
 	baseURL: HttpApi.BASEURL,
-	timeout: 10000,
-	transformRequest(data: any, headers: AxiosResponseHeaders) {
-		const stringify: string = JSON.stringify(data);
-		headers.setContentType("application/json");
-		return encryptUnicodeLong(stringify, crypto);
-	},
-	transformResponse(data: string) {
-		let unicodeLong: string;
-		try {
-			unicodeLong = decode.apply(descriptor, [data]) as string;
-			return JSON.parse(Base64.decode(unicodeLong));
-		} catch (e) {
-			console.error(e);
-		} finally {
-			console.groupEnd();
-		}
-	}
+	timeout: 10000
 };
+
 const instance: AxiosInstance = axios.create(config);
+declare module "axios" {
+	interface InternalAxiosRequestConfig {
+		key: string;
+		lb: boolean;
+	}
+}
+
 const cacheInstance: CacheAxios = CacheAxios.create({
 														adapter    : con => instance.request(con),
 														enableCache: true,
@@ -95,6 +82,47 @@ const cacheInstance: CacheAxios = CacheAxios.create({
 																response.data.code);
 														}
 													});
+instance.interceptors.request.use(value => {
+	value.lb = value.lb ?? true;
+	return Assert.isNull(value.data) || !value.lb ? setKey(value) : encrypt(value);
+	
+});
+
+function setKey(value: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
+	value.key = CryptoJS.enc.Base64.stringify(CryptoJS.lib.WordArray.random(32)).slice(0, 16);
+	value.headers.RESPONSE_KEY = encryptUnicodeLong(value.key, crypto);
+	return value;
+}
+
+function encrypt(value: InternalAxiosRequestConfig) {
+	value.key = CryptoJS.enc.Base64.stringify(CryptoJS.lib.WordArray.random(32)).slice(0, 16);
+	const stringify: string = JSON.stringify({
+												 payload: JSON.stringify(value.data),
+												 value  : value.key
+											 });
+	value.headers.setContentType("application/json");
+	value.data = encryptUnicodeLong(stringify, crypto);
+	return value;
+}
+
+function decrypt(key: string, value: AxiosResponse<any, any>): any {
+	try {
+		const k = CryptoJS.enc.Utf8.parse(key);
+		console.log(key);
+		value.data = JSON.parse(
+			CryptoJS.AES.decrypt(value.data, k, {mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7}).toString(
+				CryptoJS.enc.Utf8));
+	} catch (e) {
+		console.log(e);
+	}
+	return value;
+}
+
+instance.interceptors.response.use(value => {
+	const {key, lb} = value.config;
+	return lb ? decrypt(key, value) : value;
+});
+
 
 /**
  * 身份验签
@@ -103,7 +131,7 @@ instance.interceptors.request.use(
 	(target: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
 		if ((target.url as string).localeCompare("login") === 0) return target;
 		const store = useUserInfoStore();
-		target.headers.lb = store.token;
+		target.headers.lb_2 = store.token;
 		return target;
 	}
 );

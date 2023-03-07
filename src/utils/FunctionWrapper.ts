@@ -1,15 +1,15 @@
 import { Assert } from "@/utils/Assert";
 
-function buildContext(keys: (string | symbol)[], context: any, el: string) {
+function buildContext(keys: (string | symbol)[], el: string) {
 	const ast: string[] = [];
-	ast.push("return function(){");
-	for (let i: number = 0; i < keys.length; ++i) {
-		ast.push(`const ${keys[i] as string} = Reflect.get(this, '${keys[i] as string}');`);
-	}
-	ast.push(`return eval(${el});}`);
+	ast.push("return function render(){");
+	ast.push("const ctx=this;");
+	ast.push("with(ctx){");
+	ast.push(`return (${el})`);
+	ast.push("}");
+	ast.push("}");
 	return ast.join("");
 }
-
 
 /**
  * 它接受一个字符串和一个对象，并返回一个函数，该函数使用对象的属性作为变量来评估字符串
@@ -19,7 +19,7 @@ function buildContext(keys: (string | symbol)[], context: any, el: string) {
  */
 export function eva(el: string, context: any): any | null {
 	try {
-		const template: string = buildContext(Reflect.ownKeys(context), context, el);
+		const template: string = buildContext(Reflect.ownKeys(context), el);
 		return new Function(template);
 	} catch (e) {
 		return null;
@@ -48,26 +48,26 @@ const funReg: RegExp = /^(?<fn1>\((?<arg1>[\w,]*)\)=>.*)|(?<fn2>function([\s\w]*
  * @param {any} context - 函数的上下文，也就是函数的上下文。
  * @returns 一个接受字符串并返回具有两个属性的对象的函数：args 和 fn。
  */
-export function parseFun(el: string,context:any): { args: string[], fn: Function } {
+export function parseFun(el: string, context: any): { args: string[], fn: Function } {
 	const regExpExecArray: RegExpExecArray | null = funReg.exec(el);
 	if (Assert.isNull(regExpExecArray) || Assert.isNull(regExpExecArray?.groups)) return {
 		args: [],
-		fn  : eva(el,context)
+		fn  : eva(el, context)
 	};
 	if (Assert.notNull(regExpExecArray?.groups?.fn1)) {
 		return {
 			args: regExpExecArray!.groups!.arg1.split(","),
-			fn  : eva(el,context)
+			fn  : eva(el, context)
 		};
 	}
 	if (Assert.notNull(regExpExecArray?.groups?.fn2))
 		return {
 			args: regExpExecArray!.groups!.arg2.split(","),
-			fn  :eva(el,context)
+			fn  : eva(el, context)
 		};
 	return {
 		args: [regExpExecArray!.groups!.arg3],
-		fn  : eva(el,context)
+		fn  : eva(el, context)
 	};
 }
 
@@ -94,7 +94,7 @@ export function parseArgs(args: string[], context: any): any[] {
  * @returns 函数调用的结果。
  */
 export function runner(el: string, context: unknown): any {
-	const parse: { args: string[]; fn: Function } = parseFun(el,context);
+	const parse: { args: string[]; fn: Function } = parseFun(el, context);
 	const args: any[] = parseArgs(parse.args, context);
-	return executor(parse.fn,  context,args);
+	return executor(parse.fn, context, args);
 }

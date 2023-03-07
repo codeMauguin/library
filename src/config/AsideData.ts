@@ -17,7 +17,7 @@ export const readerAside: ElMenu[] = [{
 		icon : "icon-UIsheji_menjinxitong-28"
 	}]
 }, {
-	index: "3",el: loginEl, text: "统计分析", icon: "icon-tongjifenxi-xiangmubiaogetongji", children: [{
+	index: "3", el: loginEl, text: "统计分析", icon: "icon-tongjifenxi-xiangmubiaogetongji", children: [{
 		index: "/main", text: "报表"
 	}]
 }];

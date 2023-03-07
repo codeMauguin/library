@@ -90,7 +90,7 @@ function success(response: ResponseApi<number>, uploadFile: UploadFile, uploadFi
 	if (response.code === 200 && response.data === 0) {
 		ElMessage.success({
 			grouping: true,
-			message : response.message
+			message : response.error
 		});
 	} else {
 		ElNotification.error({

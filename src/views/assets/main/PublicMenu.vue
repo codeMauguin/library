@@ -84,7 +84,7 @@
 						:collapse-transition="true"
 						:default-active="router.currentRoute.value.path"
 						:router="true"
-						:unique-opened="true"
+						:unique-opened="false"
 						active-text-color="#409Eff"
 						background-color="#545c64"
 						class="el-menu-vertical-demo">

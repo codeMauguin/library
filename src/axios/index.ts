@@ -74,7 +74,7 @@ declare module "axios" {
 	}
 	
 	interface AxiosRequestConfig {
-		lb: boolean;
+		lb?: boolean;
 	}
 }
 

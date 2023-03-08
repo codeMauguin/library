@@ -91,14 +91,20 @@ type PrivateUser = Omit<user, "permissions">
 const pageInstance: PageInstance<PrivateUser> = new Page(new class implements LoadPage<PrivateUser> {
 	public async load(offset: number, pageSize: number, size: number, last?: PrivateUser):
 		Promise<PageData<PrivateUser>> {
-		return instance.get(AdminAPI.ALREADY_A, {params: { offset, pageSize,
-                           size, isNormal: normal.value, isBlack: blacklist.value, searchId: searchId.value}})
+		return instance.get(AdminAPI.ALREADY_A,
+							{
+								params: {
+									offset, pageSize,
+									size, isNormal: normal.value, isBlack: blacklist.value, searchId: searchId.value
+								}
+							})
 					   .then(({data: {data}}) => data);
 	}
 }());
 
 const EMPTY_PAGE = new LocalVirtualPage([], pageInstance.pageInfo);
-const error=throttle(() => warning('输入搜索用户编号'), 500);
+const error = throttle(() => warning("输入搜索用户编号"), 500);
+
 function search() {
 	IfStream.of(Assert.hasText(searchId.value)).then(filter).catch(error);
 }

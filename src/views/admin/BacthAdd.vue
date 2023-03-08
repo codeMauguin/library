@@ -47,12 +47,12 @@
     <label for="temperature" style="display: flex;align-items: center;height: 40px;margin-bottom:10px;gap: 10px">
         <span>配置:</span>
      
-        <el-tooltip :content="errorStop?'异常中断':'异常继续上传'">
+        <el-tooltip :content="errorStop?'异常中断':'异常继续添加'">
             <input id="temperature" v-model="errorStop" class="ch"  name="temperature" type="checkbox"
                    value="is_hot"
             >
         </el-tooltip>
-       <el-tooltip content="上传错误是否中断">
+       <el-tooltip content="上传错误是否中断添加">
            <el-button class="iconfont icon-tishi" text></el-button>
        </el-tooltip>
     </label>

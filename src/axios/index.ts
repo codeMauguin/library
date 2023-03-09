@@ -23,9 +23,12 @@ function encryptUnicodeLong(val: string, encrypt: JSEncrypt) {
 	//根据key所能编码的最大长度来定分段长度。key size - 11：11字节随机padding使每次加密结果都不同。
 	let maxLength = ((k["n"].bitLength() + 7) >> 3) - 11;
 	try {
-		let subStr = "", encryptedString = "";
-		let subStart = 0, subEnd = 0;
-		let bitLen = 0, tmpPoint = 0;
+		let subStr          = "",
+			encryptedString = "";
+		let subStart = 0,
+			subEnd   = 0;
+		let bitLen   = 0,
+			tmpPoint = 0;
 		const len = val.length;
 		for (let i = 0; i < len; i++) {
 			//js 是使用 Unicode 编码的，每个字符所占用的字节数不同
@@ -87,15 +90,14 @@ const cacheInstance: CacheAxios = CacheAxios.create({
 																response.data.code);
 														}
 													});
-const err: (v:any) => Promise<never> = v=>Promise.reject(v);
+const err: (v: any) => Promise<never> = v => Promise.reject(v);
 instance.interceptors.request.use(value => {
 	value.lb = value.lb ?? true;
 	return !value.lb ? value : Assert.isNull(value.data) ? setKey(value) : encrypt(value);
-	
-},err);
+}, err);
 
 function setKey(value: InternalAxiosRequestConfig): InternalAxiosRequestConfig {
-	value.key = CryptoJS.enc.Base64.stringify(CryptoJS.lib.WordArray.random(32)).slice(0, 16);
+	value.key = CryptoJS.enc.Base64.stringify(CryptoJS.lib.WordArray.random(16));
 	value.headers.RESPONSE_KEY = encryptUnicodeLong(value.key, crypto);
 	return value;
 }
@@ -115,18 +117,21 @@ function decrypt(key: string, value: AxiosResponse<any, any>): any {
 	try {
 		const k = CryptoJS.enc.Utf8.parse(key);
 		value.data = JSON.parse(
-			CryptoJS.AES.decrypt(value.data, k, {mode: CryptoJS.mode.ECB, padding: CryptoJS.pad.Pkcs7}).toString(
-				CryptoJS.enc.Utf8));
+			CryptoJS.AES.decrypt(value.data, k, {
+				mode   : CryptoJS.mode.ECB,
+				padding: CryptoJS.pad.Pkcs7
+			}).toString(CryptoJS.enc.Utf8)
+		);
 	} catch (e) {
 		console.log(e);
 	}
 	return value;
 }
+
 instance.interceptors.response.use(value => {
 	const {key, lb} = value.config;
 	return lb ? decrypt(key, value) : value;
 }, err);
-
 
 /**
  * 身份验签
@@ -137,7 +142,8 @@ instance.interceptors.request.use(
 		const store = useUserInfoStore();
 		target.headers.lb_2 = store.token;
 		return target;
-	},err
+	},
+	err
 );
 instance.interceptors.response.use(
 	(
@@ -145,13 +151,11 @@ instance.interceptors.response.use(
 	): AxiosResponse<unknown> | Promise<AxiosResponse<unknown>> => {
 		const store = useUserInfoStore();
 		//网络请求正常，且符合系统正常响应
-		if (isResponseOk(value.data.code)) return value;
+		if (isResponseOk(value.data.code) || !value.config.lb) return value;
 		if (value.data.code === 2003) {
 			store.$reset();
-			useReaderStore()
-				.$reset();
-			useBookStore()
-				.$reset();
+			useReaderStore().$reset();
+			useBookStore().$reset();
 			error("没有权限");
 		}
 		return Promise.reject(value);
@@ -175,7 +179,6 @@ instance.interceptors.response.use((value: AxiosResponse<ResponseApi<unknown>>) 
 	store.refreshToken(token);
 	return value;
 }, err);
-
 
 /**
  * 此函数接受一个数字并返回一个布尔值。

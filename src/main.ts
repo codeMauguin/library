@@ -28,6 +28,14 @@ function context(): {
 	return {permission: userInfoStore.auth, status: userInfoStore.state};
 }
 
+function getUuid() {
+	return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+		const r = Math.random() * 16 | 0, v = c == "x" ? r : (r & 0x3 | 0x8);
+		return v.toString(16);
+	});
+}
+
+
 use([CanvasRenderer,
 		PieChart,
 		TitleComponent,
@@ -53,4 +61,6 @@ router.isReady()
 		  app.mount("#app");
 		  useUserInfoStore();
 		  useNotification();
+		  //生成唯一机器码
+		  sessionStorage.setItem("code_key", getUuid());
 	  });

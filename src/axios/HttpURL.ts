@@ -28,7 +28,9 @@ const HttpApi = {
 	COMMENT_UNLIKE      : "/comment/unlike",
 	COMMENT_CANCEL      : "comment/cancelLike",
 	REVISE_USER         : "user/v2/user/revise",
-	RENEWAL_BOOK        : "order/book/renewal"
+	RENEWAL_BOOK        : "order/book/renewal",
+	CODE                : "/user/code",
+	CODE_VALID          : "/user/code/valid"
 };
 
 export default HttpApi;

@@ -3,16 +3,16 @@
 /** @format */
 /** @format */
 import instance, { cacheInstance } from "@/axios";
-import type ResponseApi            from "@/axios/ResponseApi";
-import type { PageData }           from "@/components/Pages/Page2";
-import { useNotification }         from "@/stores/NotificationStore";
-import { useReaderStore }          from "@/stores/readerStore";
-import type { BookBorrowCard }     from "@/types/Book";
-import type Notification           from "@/types/Notification";
-import type { Page }               from "@/types/page";
-import type ReaderCard             from "@/types/ReaderCard";
-import type { AxiosResponse }      from "axios";
-import { ElMessage }               from "element-plus";
+import type ResponseApi from "@/axios/ResponseApi";
+import type { PageData } from "@/components/Pages/Page2";
+import { useNotification } from "@/stores/NotificationStore";
+import { useReaderStore } from "@/stores/readerStore";
+import type { BookBorrowCard } from "@/types/Book";
+import type Notification from "@/types/Notification";
+import type { Page } from "@/types/page";
+import type ReaderCard from "@/types/ReaderCard";
+import type { AxiosResponse } from "axios";
+import { ElMessage } from "element-plus";
 
 /**
  * 它返回具有给定 ID 的卡片。
@@ -20,8 +20,8 @@ import { ElMessage }               from "element-plus";
  */
 export function getBorrowedCard(id: string) {
 	instance
-		.get(HttpURL.getCard, {params: {id}})
-		.then(({data: {data}}: AxiosResponse<ResponseApi<ReaderCard>>) => {
+		.get(HttpURL.getCard, { params: { id } })
+		.then(({ data: { data } }: AxiosResponse<ResponseApi<ReaderCard>>) => {
 			const readerStore = useReaderStore();
 			readerStore.patch(data);
 			readerStore.loadBorrowed();
@@ -29,7 +29,7 @@ export function getBorrowedCard(id: string) {
 		.catch(data =>
 			ElMessage.warning({
 				grouping: true,
-				message : data
+				message: data
 			})
 		);
 }
@@ -52,14 +52,14 @@ export async function getBorrowedBooks(
 				status
 			},
 			{
-				hit   : true,
+				hit: true,
 				expire: 1000 * 10
 			}
 		)
 		.then(
 			({
-				 data: {data}
-			 }: AxiosResponse<ResponseApi<PageData<BookBorrowCard>>>): PageData<BookBorrowCard> =>
+				data: { data }
+			}: AxiosResponse<ResponseApi<PageData<BookBorrowCard>>>): PageData<BookBorrowCard> =>
 				data
 		);
 }
@@ -68,9 +68,9 @@ export async function getBorrowedBooks(
 export async function getNotification(id: string): Promise<void> {
 	try {
 		const {
-				  data: {data}
-			  }: AxiosResponse<ResponseApi<Notification[]>> = await instance.get("/notification", {
-			params: {id: id}
+			data: { data }
+		}: AxiosResponse<ResponseApi<Notification[]>> = await instance.get("/notification", {
+			params: { id: id }
 		});
 		const notification = useNotification();
 		notification.init(data);

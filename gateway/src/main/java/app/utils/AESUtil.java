@@ -2,9 +2,12 @@ package app.utils;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 public class AESUtil {
+	
+	private static final String cipherMode = "AES/ECB/PKCS5Padding";
 	
 	private static Cipher getCipher(byte[] key) throws Exception {
 		Cipher cipher = Cipher.getInstance("AES");
@@ -21,11 +24,9 @@ public class AESUtil {
 	 * @return 返回加密后密文，编码为base64
 	 */
 	public static byte[] encryptECB(byte[] message, String key) {
-		final String cipherMode = "AES/ECB/PKCS5Padding";
-		final String charsetName = "UTF-8";
 		try {
 			byte[] content;
-			byte[] keyByte = key.getBytes(charsetName);
+			byte[] keyByte = key.getBytes(StandardCharsets.UTF_8);
 			SecretKeySpec keySpec = new SecretKeySpec(keyByte, "AES");
 			
 			Cipher cipher = Cipher.getInstance(cipherMode);

@@ -58,56 +58,6 @@ public class AccountImpl implements AccountService {
 		return nameLogin ? login(name, password) : login(id, password);
 	}
 	
-	private User login(String name, String password) {
-		Long id = accountDao.queryId(name);
-		if (id == null) return null;
-		String saltById = accountDao.getSaltById(id);
-		if (saltById == null || saltById.isEmpty()) return null;
-		Boolean login = accountDao.login(id, SignUtil.signing(password, saltById));
-		if (Boolean.TRUE.equals(login)) {
-			User user = userDao.queryByIdOrName(null, name);
-			afterLogin(user);
-			return user;
-		}
-		return null;
-	}
-	
-	private User login(Long id, String password) {
-		String saltById = accountDao.getSaltById(id);
-		if (saltById == null || saltById.isEmpty()) return null;
-		
-		Boolean login = accountDao.login(id, SignUtil.signing(password, saltById));
-		if (Boolean.TRUE.equals(login)) {
-			User user = userDao.queryByIdOrName(id, null);
-			afterLogin(user);
-			return user;
-		}
-		return null;
-	}
-	
-	// 一个钩子函数。
-	private void afterLogin(User user) {
-		ServletRequestAttributes requestAttributes =
-				(ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-		if (requestAttributes == null) {
-			return;
-		}
-		HttpServletResponse response = requestAttributes.getResponse();
-		if (response == null) return;
-		String format = String.format(pattern, user.getId());
-		String token = redisTemplate.opsForValue().get(format);
-		if (!StringUtils.hasText(token)) {
-			token = SignUtil.signing();
-			redisTemplate.opsForValue().set(format, token);
-			redisTemplate
-					.opsForList()
-					.leftPushAll(token, user.getPermissions(), String.valueOf(user.getId()));
-		}
-		redisTemplate.expire(token, 2, TimeUnit.HOURS);
-		redisTemplate.expire(format, 2, TimeUnit.HOURS);
-		response.setHeader(TOKEN_RES_KEY, token);
-	}
-	
 	@Override
 	public Long registry(String name, String password, String permission) {
 		String salt = SignUtil.obfuscate(Math.max(5, Math.abs(name.length() - 20)));
@@ -153,5 +103,47 @@ public class AccountImpl implements AccountService {
 	public Integer query_size(PageInfo pageInfo, Boolean isNormal, Boolean isBlack,
 							  Long searchId) {
 		return userDao.query_size(pageInfo, isNormal, isBlack, searchId);
+	}
+	
+	private User login(String name, String password) {
+		Long id = accountDao.queryId(name);
+		if (id == null) return null;
+		return login(id, password);
+	}
+	
+	private User login(Long id, String password) {
+		String saltById = accountDao.getSaltById(id);
+		if (saltById == null || saltById.isEmpty()) return null;
+		
+		Boolean login = accountDao.login(id, SignUtil.signing(password, saltById));
+		if (Boolean.TRUE.equals(login)) {
+			User user = userDao.queryByIdOrName(id, null);
+			afterLogin(user);
+			return user;
+		}
+		return null;
+	}
+	
+	// 一个钩子函数。
+	private void afterLogin(User user) {
+		ServletRequestAttributes requestAttributes =
+				(ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		if (requestAttributes == null) {
+			return;
+		}
+		HttpServletResponse response = requestAttributes.getResponse();
+		if (response == null) return;
+		String format = String.format(pattern, user.getId());
+		String token = redisTemplate.opsForValue().get(format);
+		if (!StringUtils.hasText(token)) {
+			token = SignUtil.signing();
+			redisTemplate.opsForValue().set(format, token);
+			redisTemplate
+					.opsForList()
+					.leftPushAll(token, user.getPermissions(), String.valueOf(user.getId()));
+		}
+		redisTemplate.expire(token, 2, TimeUnit.HOURS);
+		redisTemplate.expire(format, 2, TimeUnit.HOURS);
+		response.setHeader(TOKEN_RES_KEY, token);
 	}
 }

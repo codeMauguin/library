@@ -23,7 +23,8 @@ public interface AccountController {
 	 */
 	@PostMapping("/v2/login")
 	@JsonResponse
-	RestResponse login(Long id, String name, @NotNull(message = "密码为空") String password);
+	RestResponse login(Long id,  String name,@NotNull String card,
+					   @NotNull(message = "密码为空") String password);
 	
 	/**
 	 * 注册用户的功能。

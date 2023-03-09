@@ -3,11 +3,14 @@ package app.views;
 import Message.RestResponse;
 import app.annotation.CheckRole;
 import app.annotation.JsonResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+
+import java.io.IOException;
 
 @Validated
 public interface UserController {
@@ -27,4 +30,11 @@ public interface UserController {
 	RestResponse revise(@JsonResponse String name,
 						@JsonResponse String password,
 						@RequestHeader("proxy-id") Long id);
+	
+	@GetMapping("/code")
+	void code(@NotNull(message = "用户名不能为空") String username, HttpServletResponse response) throws
+																								  IOException;
+	
+	@GetMapping("/code/valid")
+	RestResponse code_valid(@NotNull String username,@NotNull String code);
 }

@@ -4,6 +4,7 @@ import app.annotation.CheckIgnore;
 import app.annotation.CheckLogin;
 import app.annotation.CheckRole;
 import app.exception.NoPermission;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -36,9 +37,11 @@ public class PermissionInterceptors implements HandlerInterceptor {
 	 * @return 一个布尔值。
 	 */
 	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
-							 Object handler) throws
-											 Exception {
+	
+	public boolean preHandle(@Nonnull HttpServletRequest request,
+							 @Nonnull HttpServletResponse response,
+							 @Nonnull Object handler) throws
+													  Exception {
 		if (handler instanceof HandlerMethod method) {
 			List<Annotation> classes = CACHE.get(method);
 			if (classes == null) {

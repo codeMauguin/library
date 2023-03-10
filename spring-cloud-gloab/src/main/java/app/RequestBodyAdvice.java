@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Configuration;
@@ -59,31 +60,16 @@ public class RequestBodyAdvice implements HandlerMethodArgumentResolver {
 	}
 	
 	@Override
-	public Object resolveArgument(MethodParameter parameter,
+	public Object resolveArgument(@Nonnull MethodParameter parameter,
 								  ModelAndViewContainer mavContainer,
-								  NativeWebRequest webRequest,
+								  @Nonnull NativeWebRequest webRequest,
 								  WebDataBinderFactory binderFactory) throws Exception {
 		
 		
 		Map.Entry<String, JsonResponse> responseEntry = CACHE.get(parameter);
 		parameter = parameter.nestedIfOptional();
 		if (responseEntry == null) {
-			JsonResponse parameterAnnotation =
-					Optional.ofNullable(parameter.getParameterAnnotation(JsonResponse.class))
-							.orElse(parameter.getMethodAnnotation(JsonResponse.class));
-			assert parameterAnnotation != null;
-			String ann = parameterAnnotation.value().length == 1 ?
-								 parameterAnnotation.value()[0] :
-								 parameterAnnotation.value()[parameter.getParameterIndex()];
-			String parameterName = parameterAnnotation.value().length > 0 && StringUtils.hasText(
-					ann
-																								) ?
-										   ann : Optional
-														 .ofNullable(parameter.getParameterName())
-														 .orElse(Conventions.getVariableNameForParameter(parameter));
-			responseEntry = new AbstractMap.SimpleImmutableEntry<>(parameterName,
-					parameterAnnotation);
-			CACHE.put(parameter, responseEntry);
+			responseEntry = cache(parameter);
 		}
 		JsonResponse parameterAnnotation = responseEntry.getValue();
 		Type nestedGenericParameterType = parameter.getNestedGenericParameterType();
@@ -121,7 +107,34 @@ public class RequestBodyAdvice implements HandlerMethodArgumentResolver {
 		return arg;
 	}
 	
-	public JsonNode get(NativeWebRequest webRequest,
+	/**
+	 * > 如果参数有@JsonResponse注解，则返回一个以参数名为key，注解为value的Map.Entry
+	 * 并缓存当前参数
+	 * @param parameter 要解析的参数。该参数提供对各种方法相关信息的访问，例如方法名称、方法返回类型、方法注释等。
+	 * @return 一个 Map.Entry<String, JsonResponse>
+	 */
+	private Map.Entry<String, JsonResponse> cache(MethodParameter parameter) {
+		JsonResponse parameterAnnotation =
+				Optional.ofNullable(parameter.getParameterAnnotation(JsonResponse.class))
+						.orElse(parameter.getMethodAnnotation(JsonResponse.class));
+		assert parameterAnnotation != null;
+		String ann = parameterAnnotation.value().length == 1 ?
+							 parameterAnnotation.value()[0] :
+							 parameterAnnotation.value()[parameter.getParameterIndex()];
+		String parameterName = parameterAnnotation.value().length > 0 && StringUtils.hasText(
+				ann
+																							) ?
+									   ann : Optional
+													 .ofNullable(parameter.getParameterName())
+													 .orElse(Conventions.getVariableNameForParameter(parameter));
+		Map.Entry<String, JsonResponse> responseEntry =
+				new AbstractMap.SimpleImmutableEntry<>(parameterName,
+						parameterAnnotation);
+		CACHE.put(parameter, responseEntry);
+		return responseEntry;
+	}
+	
+	public JsonNode get(@Nonnull NativeWebRequest webRequest,
 						boolean once) throws IOException {
 		JsonNode attribute = (JsonNode) webRequest.getAttribute(REQUEST_JSON_KEY,
 				RequestAttributes.SCOPE_REQUEST);

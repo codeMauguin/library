@@ -7,10 +7,12 @@ import app.pojo.CommentRequest;
 import app.utils.SnowFlakeIdWorker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 import pojo.PageData;
 import pojo.PageInfo;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -19,13 +21,17 @@ public class CommentServiceImpl implements CommentService {
 	private final SnowFlakeIdWorker snowFlakeIdWorker;
 	private final UserService userService;
 	
+	private final TransactionTemplate transactionTemplate;
+	
 	public CommentServiceImpl(
 			@Autowired CommentDao commentDao,
 			@Autowired SnowFlakeIdWorker snowFlakeIdWorker,
-			@Autowired UserService userService) {
+			@Autowired UserService userService,
+			@Autowired TransactionTemplate transactionTemplate) {
 		this.commentDao = commentDao;
 		this.snowFlakeIdWorker = snowFlakeIdWorker;
 		this.userService = userService;
+		this.transactionTemplate = transactionTemplate;
 	}
 	
 	@Override
@@ -86,6 +92,23 @@ public class CommentServiceImpl implements CommentService {
 		return commentDao.cancelLike(id, userId);
 	}
 	
+	@Override
+	public Boolean deleteComment(Long id) {
+		List<Long> query = query(id);
+		return transactionTemplate.execute(status -> {
+			try {
+				for (Long ids : query) {
+					commentDao.deleteComment(ids);
+					commentDao.deleteCommentInfo(ids);
+				}
+				return true;
+			} catch (Exception e) {
+				status.setRollbackOnly();
+			}
+			return false;
+		});
+	}
+	
 	private void injectComment(Long userId, List<Comment> comments) {
 		for (Comment comment : comments) {
 			Comment queryComment = commentDao.queryComment(comment.getId(), userId);
@@ -96,5 +119,15 @@ public class CommentServiceImpl implements CommentService {
 			// 查询图书拥有者账户
 			comment.setUser(userService.query(queryComment.getUser_id()));
 		}
+	}
+	
+	private List<Long> query(Long id) {
+		// 查出当前的自id
+		List<Long> longs = commentDao.queryChild(id);
+		
+		return Stream.concat(longs.stream().flatMap(
+							 i -> query(i).stream()
+												   ), longs.stream())
+					 .toList();
 	}
 }

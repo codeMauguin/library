@@ -104,7 +104,6 @@ public class OrderServiceImpl implements OrderService {
 		// 查询库存并放入redis
 		CompletableFuture<Boolean> queryStock = CompletableFuture.supplyAsync(() -> {
 			List<Long> task = new ArrayList<>();
-			
 			for (Long aLong : bookIds) {
 				Integer value = redisTemplates.opsForValue()
 											  .getAndExpire(String.format(key(aLong)),

@@ -69,7 +69,7 @@ public class UserControllerImpl implements UserController {
 				20));
 // 生成随机数或符号
 		Random random = new Random();
-		String code = "";
+		StringBuilder code = new StringBuilder();
 		for (int i = 0; i < 4; i++) {
 			// 随机生成数字或字母
 			int num = random.nextInt(10 + 26 * 2);
@@ -82,7 +82,7 @@ public class UserControllerImpl implements UserController {
 				c = (char) ('a' + num - 36);
 			}
 			// 将字符添加到code字符串中
-			code += c;
+			code.append(c);
 			// 设置随机颜色
 			graphics.setColor(new Color(random.nextInt(256),
 					random.nextInt(256),
@@ -108,7 +108,7 @@ public class UserControllerImpl implements UserController {
 		String key = username + ":code";
 		redisTemplate.opsForValue()
 					 .set(key,
-							 code);
+							 code.toString());
 		redisTemplate.expire(key, 30, TimeUnit.SECONDS);
 // 将图片输出到响应流中
 		response.setContentType(MediaType.IMAGE_JPEG_VALUE);

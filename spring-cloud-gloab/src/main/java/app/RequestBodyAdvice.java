@@ -64,8 +64,6 @@ public class RequestBodyAdvice implements HandlerMethodArgumentResolver {
 								  ModelAndViewContainer mavContainer,
 								  @Nonnull NativeWebRequest webRequest,
 								  WebDataBinderFactory binderFactory) throws Exception {
-		
-		
 		Map.Entry<String, JsonResponse> responseEntry = CACHE.get(parameter);
 		parameter = parameter.nestedIfOptional();
 		if (responseEntry == null) {

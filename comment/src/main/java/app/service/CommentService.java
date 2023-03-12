@@ -36,4 +36,6 @@ public interface CommentService {
 	Boolean commentUnLikes(Long id, Long userId);
 	
 	Boolean commentCancelLikes(Long id, Long userId);
+	
+	Boolean deleteComment(Long id);
 }

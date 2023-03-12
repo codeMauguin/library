@@ -4,17 +4,27 @@
 <mapper namespace="app.dao.CommentDao">
     <insert id="commit" parameterType="app.pojo.Comment">
         INSERT INTO lb_comments (id, bookId, user_id,
-        content,
-        parent_id, root_id)
-        SELECT #{comment.id} as id,
-        #{comment.bookId} as bookId,
-        #{comment.user_id} as user_id,
-        #{comment.content} as content,
-        #{comment.parent_id} as parent_id,
-        IFNULL((SELECT root_id FROM lb_comments WHERE id = #{comment.parent_id}),
-        #{comment.parent_id})
-        as rootId
+                                 content,
+                                 parent_id, root_id)
+        SELECT #{comment.id}        as id,
+               #{comment.bookId}    as bookId,
+               #{comment.user_id}   as user_id,
+               #{comment.content}   as content,
+               #{comment.parent_id} as parent_id,
+               IFNULL((SELECT root_id FROM lb_comments WHERE id = #{comment.parent_id}),
+                      #{comment.parent_id})
+                                    as rootId
     </insert>
+    <delete id="deleteComment">
+        DELETE
+        FROM lb_comments
+        WHERE id = #{ids};
+    </delete>
+    <delete id="deleteCommentInfo">
+        DELETE
+        FROM lb_comment_info lci
+        WHERE lci.comment_id = #{ids}
+    </delete>
 
     <resultMap id="comment" type="app.pojo.Comment" autoMapping="true">
         <id column="id" property="id"/>
@@ -78,33 +88,58 @@
         SELECT lb.*
         FROM lb_comments lb
         WHERE root_id = #{id}
-        OR parent_id = #{id}
+           OR parent_id = #{id}
+    </select>
+    <select id="queryChild" resultType="java.lang.Long">
+        SELECT id
+        FROM lb_comments lc
+        WHERE lc.parent_id = #{id}
     </select>
 
     <update id="like">
-        UPDATE lb_comment_info SET status =0
-        WHERE comment_id= #{id} AND userId= #{cardId}
+        UPDATE lb_comment_info
+        SET status =0
+        WHERE comment_id = #{id}
+          AND userId = #{cardId}
     </update>
 
     <insert id="insertLike">
-        INSERT INTO lb_comment_info (SELECT #{id} as comment_id ,#{userId} as userId ,0 as
-        status FROM DUAL WHERE NOT exists(SELECT 1 FROM lb_comment_info lci WHERE lci.comment_id
-        = #{id} AND lci.userId = #{userId}))
+        INSERT INTO lb_comment_info (SELECT #{id}     as comment_id,
+                                            #{userId} as userId,
+                                            0         as
+                                                         status
+                                     FROM DUAL
+                                     WHERE NOT exists(SELECT 1
+                                                      FROM lb_comment_info lci
+                                                      WHERE lci.comment_id
+                                                          = #{id}
+                                                        AND lci.userId = #{userId}))
     </insert>
 
     <insert id="insertUnLike">
-        INSERT INTO lb_comment_info (SELECT #{id} as comment_id ,#{userId} as userId ,1 as
-        status FROM DUAL WHERE NOT exists(SELECT 1 FROM lb_comment_info lci WHERE lci.comment_id
-        = #{id} AND lci.userId = #{userId}))
+        INSERT INTO lb_comment_info (SELECT #{id}     as comment_id,
+                                            #{userId} as userId,
+                                            1         as
+                                                         status
+                                     FROM DUAL
+                                     WHERE NOT exists(SELECT 1
+                                                      FROM lb_comment_info lci
+                                                      WHERE lci.comment_id
+                                                          = #{id}
+                                                        AND lci.userId = #{userId}))
     </insert>
 
     <update id="unLike">
-        UPDATE lb_comment_info SET status = 1
-        WHERE comment_id= #{id} AND userId= #{userId}
+        UPDATE lb_comment_info
+        SET status = 1
+        WHERE comment_id = #{id}
+          AND userId = #{userId}
     </update>
 
     <update id="cancelLike">
-        UPDATE lb_comment_info SET status = -1
-        WHERE comment_id= #{id} AND userId= #{userId}
+        UPDATE lb_comment_info
+        SET status = -1
+        WHERE comment_id = #{id}
+          AND userId = #{userId}
     </update>
 </mapper>

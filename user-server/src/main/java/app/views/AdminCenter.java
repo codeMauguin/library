@@ -22,7 +22,8 @@ public interface AdminCenter {
 	
 	@PatchMapping("/api/user/total")
 	@JsonResponse
-	RestResponse update_user_total(@NotNull Long id, @NotNull Integer total);
+	RestResponse update_user_total(@NotNull(message = "用户id为空") Long id,
+								   @NotNull(message = "修改总数为空") Integer total);
 	
 	@PutMapping("/api/pullIntoBackList")
 	RestResponse pullIntoTheBlacklist(@NotNull @RequestBody Long id);

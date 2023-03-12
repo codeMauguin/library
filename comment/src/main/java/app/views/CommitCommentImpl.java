@@ -30,6 +30,6 @@ public class CommitCommentImpl implements CommitComment {
 		if (!userId.equals(currentId)) {
 			return RestResponse.response(ResponseCode.ERROR_ROLE);
 		}
-		return null;
+		return RestResponse.response(commentService.deleteComment(id),ResponseCode.SUCCESS);
 	}
 }

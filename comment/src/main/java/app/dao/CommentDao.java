@@ -46,4 +46,9 @@ public interface CommentDao {
 	boolean unLike(@Param("id") Long id, @Param("userId") Long userId);
 	
 	Boolean cancelLike(@Param("id") Long id, @Param("userId") Long userId);
+	
+	List<Long> queryChild(@Param("id") Long id);
+	
+	Boolean deleteComment(@Param("ids") Long ids);
+	Boolean deleteCommentInfo(@Param("ids") Long ids);
 }

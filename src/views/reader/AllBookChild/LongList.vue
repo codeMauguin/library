@@ -195,7 +195,7 @@ function isChildElementInViewport(parentEl: HTMLElement, childEl: HTMLElement) {
 //收集元素变化计算页面长度变化
 watchEffect(() => {
 	const row = Math.ceil(Math.max(0, BooksData.pageInfo.totalSize) / column.value);
-	clientScrollHeight.value = `${(row * (gap.value + height) - gap_y)}px`;
+	clientScrollHeight.value = `${(row * (gap_y + height) - gap_y)}px`;
 });
 
 

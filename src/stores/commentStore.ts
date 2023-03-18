@@ -3,8 +3,8 @@ import instance                    from "@/axios";
 import type ResponseApi            from "@/axios/ResponseApi";
 import type { LoadPage, PageData } from "@/components/Pages/Page2";
 import { Page }                    from "@/components/Pages/Page2";
-import type { returnType }         from "@/types/CommentType";
 import type CommentType            from "@/types/CommentType";
+import type { returnType }         from "@/types/CommentType";
 import type { AxiosResponse }      from "axios";
 import { defineStore }             from "pinia";
 
@@ -83,6 +83,7 @@ export const useCommentStore = defineStore("comment", () => {
 		rootId?: string
 	): void {
 		if (!bookId || bookId.length === 0) return;
+		debugger
 		const target: Page<CommentType> = _[bookId];
 		if (Assert.isNull(target)) {
 			console.warn(`未存在${bookId}书籍评论`);

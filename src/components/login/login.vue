@@ -61,17 +61,17 @@
     </div>
 </template>
 <script lang="ts" setup>
-import instance                              from "@/axios";
-import HttpApi                               from "@/axios/HttpURL";
-import type ResponseApi                      from "@/axios/ResponseApi";
-import { user, valid }                       from "@/components/login/type";
-import { useUserInfoStore }                  from "@/stores/counter";
-import { closeLoading }                      from "@/utils";
-import type { AxiosResponse }                from "axios";
-import { type FormInstance, type FormRules } from "element-plus";
-import type { Ref }                          from "vue";
-import { reactive, ref }                     from "vue";
-import { useRouter }                         from "vue-router";
+import instance                                              from "@/axios";
+import HttpApi                                               from "@/axios/HttpURL";
+import type ResponseApi                                      from "@/axios/ResponseApi";
+import { user, valid }                                       from "@/components/login/type";
+import { useUserInfoStore }                                  from "@/stores/counter";
+import { closeLoading }                                      from "@/utils";
+import type { AxiosResponse }                                from "axios";
+import { ElNotification, type FormInstance, type FormRules } from "element-plus";
+import type { Ref }                                          from "vue";
+import { reactive, ref }                                     from "vue";
+import { useRouter }                                         from "vue-router";
 
 const ruleFormRef: Ref<FormInstance | null> = ref<FormInstance | null>(null);
 const rules = reactive<FormRules>({
@@ -107,9 +107,15 @@ function submitLogin(formEl: FormInstance | null): void {
 				})
 				.catch(() => {
 					if (!Assert.hasText(user.code)) {
-						error("请输入验证码");
+						ElNotification.error({
+												 title  : "登录",
+												 message: "请输入验证码"
+											 });
 					} else {
-						error("请输入用户名或密码");
+						ElNotification.error({
+												 title  : "登录",
+												 message: "请输入用户名或密码"
+											 });
 					}
 				}).next()
 				.then(async () => {
@@ -134,7 +140,10 @@ function submitLogin(formEl: FormInstance | null): void {
 						__SELF__: FLAG
 					};
 				}).catch(() => {
-			warning("验证码错误");
+			ElNotification.warning({
+									   title  : "登录",
+									   message: "验证码错误"
+								   });
 			getCode();
 			user.code = "";
 		}).next()
@@ -148,13 +157,19 @@ function submitLogin(formEl: FormInstance | null): void {
 							  })
 						.finally(() => {
 							closeLoading();
-							success("登陆成功");
+							ElNotification.success({
+													   title  : "登录",
+													   message: "登陆成功"
+												   });
 						});
 					return true;
 				}).catch((value) => {
 			user.password = "";
 			closeLoading();
-			warning(value?.data?.error);
+			ElNotification.error({
+									 title  : "登录",
+									 message: value?.data?.error
+								 });
 			return false;
 		});
 	});

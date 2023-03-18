@@ -1,9 +1,9 @@
 <!-- @format -->
 
 <script lang="ts" setup>
-	import { computed, type ComputedRef, defineProps, type Ref, ref } from "vue";
+import { computed, type ComputedRef, defineProps, type Ref, ref } from "vue";
 
-	const show: Ref<boolean> = ref<boolean>(false);
+const show: Ref<boolean> = ref<boolean>(false);
 	const loading: Ref<boolean> = ref<boolean>(false);
 
 	const emits = defineEmits<{ (e: "change", cur: number): void }>();
@@ -43,7 +43,7 @@
 <template>
 	<div class="ix">
 		<el-collapse-transition>
-			<div v-show="show">
+			<div v-show="show" class="parent">
 				<slot
 					class="transition-box"
 					name="body"></slot>
@@ -78,5 +78,10 @@
 		user-select: none;
 		display: flex;
 		align-items: center;
+	}
+	.parent{
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
 	}
 </style>

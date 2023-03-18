@@ -335,7 +335,7 @@ function listener(): void {
 .content {
     display: flex;
     height: 100%;
-	width: 100%;
+  	width: 100%;
     flex-direction: column;
     gap: 15px;
 }

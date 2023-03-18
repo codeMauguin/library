@@ -51,7 +51,7 @@ export interface PageInstance<T> {
 	/**
 	 * 它刷新当前页面。
 	 */
-	refresh(): Promise<void>;
+	refresh(...args: any[] | undefined[]): Promise<void>;
 	
 	virtual(virtualPage?: VirtualPage<T>): void;
 }
@@ -266,12 +266,7 @@ abstract class AbstractPage<T> implements PageInstance<T> {
 	 * @param {number} pageSize - 页面上显示的项目数。
 	 */
 	protected updateView(offset: number, pageSize: number): void {
-		for (let i: number = 0; i < pageSize && i < this.data.length; ++i) {
-			(<UnwrapNestedRefs<T>>this.view[i]) = <UnwrapNestedRefs<T>>this.data[i + offset];
-		}
-		if (this.view.length > pageSize) {
-			this.view.splice(pageSize, this.view.length - pageSize);
-		}
+		this.view.splice(0, this.view.length, ...(this.data.slice(offset, offset + pageSize) as UnwrapNestedRefs<T[]>));
 	}
 }
 

@@ -52,10 +52,11 @@ async function commitOrder(commodity: commodity, signalDriver: SignalDriver): Pr
 	signalDriver.emit(1);
 	try {
 		const {
-				  data: {data}
+				  data: {data,error}
 			  } = await instance.post(HttpURL.commitOrder, {
 			orderId
 		});
+		
 		signalDriver.emit(2, data);
 		return true;
 	} catch (e) {

@@ -1,187 +1,253 @@
 <!-- @format -->
 
 <template>
-	<div
-		ref="el"
-		class="infinite-list content"
-		infinite-scroll-delay="100"
-		infinite-scroll-distance="1000"
-		@scroll="scroll">
-		<template
-			v-for="(book, i) in BooksData.view"
-			:key="book.id">
-			<book-view
-				v-show="isEnd(i) || show(i)"
-				:cancel="() => shoppingCart.removeAProduct(book)"
-				:check-has-borrowed="
-					() => readerStore.borrowALibraryCard.borrowedBook.indexOf(book.id) > -1
+    <div ref="el" class="content" @scroll="scroll">
+        <div
+                class=" _____boxed "
+        >
+            <div
+                    v-for="item in BooksData.view"
+                    :key="item.index"
+            >
+
+                <book-view
+                        :cancel="() => shoppingCart.removeAProduct(item.value)"
+                        :check-has-borrowed="
+					() => readerStore.borrowALibraryCard.borrowedBook.indexOf(item.value.id) > -1
 				"
-				:check-has-checked="() => !!shoppingCart._[book.id]"
-				:prop="book"
-				:style="position(i)"
-				class="child"
-				@addAShoppingCart="() => shoppingCart.addToCart(book)"
-				@click.prevent="
-					() => {
-						linkTo(book);
+                        :check-has-checked="() => !!shoppingCart._[item.value.id]"
+                        :prop="item.value"
+                        :style="position(item.index)"
+                        class="child"
+                        @addAShoppingCart="() => shoppingCart.addToCart(item.value)"
+                        @click.prevent="
+					(e:Event) => {
+            e.preventDefault();
+						linkTo(item.value);
 					}
-				" />
-		</template>
-		<el-backtop
-			:bottom="180"
-			:right="60"
-			style="width: 60px"
-			target=".infinite-list">
-			<button class="btn_top">
-				<div class="arrow-up" />
-			</button>
-		</el-backtop>
-	</div>
+				"/>
+            </div>
+        </div>
+        <el-backtop
+                :bottom="180"
+                :right="60"
+                style="width: 60px"
+                target=".content">
+            <button class="btn_top">
+                <div class="arrow-up"/>
+            </button>
+        </el-backtop>
+    </div>
 </template>
 <script lang="ts" setup>
-	import LongPage from "@/components/Pages/LongPage";
-	import type { PageInstance } from "@/components/Pages/Page2";
-	import type { LoadPage, PageData } from "@/components/Pages/Page2";
-	import router from "@/router";
-	import { useReaderStore } from "@/stores/readerStore";
-	import { useShopStore } from "@/stores/ShopStore";
-	import type Book from "@/types/Book";
-	import { default as BookView } from "@/views/reader/Book.vue";
-	import type { Ref } from "vue";
-	import { ref } from "vue";
+import LongPage                    from "@/components/Pages/LongPage";
+import type { LoadPage, PageData } from "@/components/Pages/Page2";
+import router                      from "@/router";
+import { useReaderStore }          from "@/stores/readerStore";
+import { useShopStore }            from "@/stores/ShopStore";
+import type Book                   from "@/types/Book";
+import { Assert }                  from "@/utils";
+import { default as BookView }     from "@/views/reader/Book.vue";
+import { watchEffect }             from "vue";
+import type { Ref }                from "vue";
+import { ref }                     from "vue";
 
-	const shoppingCart = useShopStore();
-	const readerStore = useReaderStore();
-	const store = useBookStore();
-	const el: Ref<HTMLElement> = <Ref<HTMLElement>>ref<HTMLElement>();
+const shoppingCart = useShopStore();
+const readerStore = useReaderStore();
+const store = useBookStore();
+const el: Ref<HTMLElement | null> = ref(null);
+const width: number = 200;
+const height: number = 300;
 
-	function linkTo(book: Book): void {
-		store.addBook(book);
-		router.push({
-			name: `book`,
-			params: { id: book.id }
-		});
-	}
+const clientHeight: Ref<number> = ref(document.body.clientHeight);
+const column: Ref<number> = ref<number>(1);
+const gap: Ref<number> = ref<number>(10);
 
-	function position(index: number): { [key: string]: string } {
-		const curRow: number = Math.floor(index / column.value);
-		const curColumn: number = index - curRow * column.value;
-		return {
-			transform: `translate(${space.value * (curColumn + 1) + 200 * curColumn}px,${
-				space.value * (1 + curRow) + 300 * curRow
-			}px)`
-		};
-	}
-
-	onActivated(() => {
-		flush();
-	});
-
-	const BooksData: PageInstance<Book> = new LongPage<Book>(
-		new (class implements LoadPage<Book> {
-			public load(
-				offset: number,
-				pageSize: number,
-				size: number,
-				last?: Book
-			): Promise<PageData<Book>> {
-				return cacheInstance
-					.post(
-						HttpURL.getAllBooks,
-						{
-							pageInfo: {
-								offset,
-								pageSize,
-								size,
-								id: last?.id
-							}
-						},
-						{
-							group: "BOOK"
+const gap_y = 10;//设置上下间距
+const clientTop: Ref<number> = ref<number>(0);//客户端的距离顶部的高度
+const clientScrollHeight: Ref<string> = ref("0px");
+const BooksData: LongPage<Book> = new LongPage<Book>(
+	new (class implements LoadPage<Book> {
+		public load(offset: number, pageSize: number, size: number, last?: Book): Promise<PageData<Book>> {
+			return cacheInstance
+				.post(
+					HttpURL.getAllBooks,
+					{
+						pageInfo: {
+							offset,
+							pageSize,
+							size,
+							id: last?.id
 						}
-					)
-					.then(({ data: { data } }) => data);
-			}
-		})()
+					},
+					{
+						group: "BOOK"
+					}
+				)
+				.then(({data: {data}}) => data);
+		}
+	})()
+);
+
+
+function linkTo(book: Book): void {
+	store.addBook(book);
+	router.push({
+					name  : `book`,
+					params: {id: book.id}
+				});
+}
+
+/**
+ * @fixme 03-18 宽度变化和总高度不一致导致可视区域五渲染元素
+ * @param {number} index
+ * @return {{[p: string]: string}}
+ */
+function position(index: number): { [key: string]: string } {
+	const top: number = Math.floor(index / column.value);
+	const curCol: number = index - (top * column.value);
+	gap.value = (el.value!.clientWidth - column.value * width) / (column.value + 1);
+	return {
+		transform: `translate(${curCol * width + curCol * gap.value}px,${
+			top * height + top * gap_y
+		}px)`
+	};
+}
+
+const throttle_mounted = throttle(mounted, 300);
+const resizeObserver: ResizeObserver = new ResizeObserver(entries => {
+	throttle_mounted();
+});
+
+
+const scroll = throttle_mounted;
+
+defineExpose<{ refresh: () => void; search: (virtual: Book[]) => void }>({
+																			 refresh() {
+																				 const [start, end] = getRange();
+																				 BooksData.virtualTo(null, start, end);
+																				 updateToView();
+																			 },
+																			 search(virtual: Book[]) {
+																				 BooksData.virtualTo(
+																					 new LocalVirtualPage<Readonly<{
+																						 value: Book,
+																						 index: number
+																					 }>>(virtual.map((value,
+																									  index) =>
+																										 ({
+																											 value,
+																											 index
+																										 })),
+																						 BooksData.pageInfo),
+																					 0, virtual.length);
+																				 updateToView();
+																			 }
+																			 
+																		 });
+
+
+/**
+ * 加载页面容纳的列和行数
+ */
+
+function mounted(): Promise<void> | void {
+	if (Assert.isNull(el.value)) return;
+	clientTop.value = el.value!.scrollTop;
+	clientHeight.value = el.value!.offsetHeight;
+	column.value = Math.floor((el.value!.clientWidth + gap.value) / (gap.value + width));
+	updateToView();
+}
+
+onActivated(throttle_mounted);
+
+onMounted(throttle_mounted);
+onMounted(() => {
+	resizeObserver.observe(el.value as HTMLElement);
+});
+
+function isElementInViewport(el: HTMLElement) {
+	const rect = el.getBoundingClientRect();
+	
+	return (
+		rect.top >= 0 &&
+		rect.left >= 0 &&
+		rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+		rect.right <= (window.innerWidth || document.documentElement.clientWidth)
 	);
+}
 
-	const up: Ref<number> = ref<number>(0);
-	const down: Ref<number> = ref<number>(0);
-	const isEnd = (index: number): boolean => {
-		return index >= BooksData.view.length - column.value;
-	};
-	const scroll = throttle((e: Event) => {
-		const target: HTMLElement = e.target as HTMLElement;
-		up.value = Math.floor(target.scrollTop / (300 + space.value));
-		row.value = Math.ceil(el.value.clientHeight / 300);
-		down.value = up.value + row.value;
-		if (target.scrollHeight - target.scrollTop <= row.value * 300) {
-			load();
-		}
-	}, 300);
+function isChildElementInViewport(parentEl: HTMLElement, childEl: HTMLElement) {
+	const parentRect = parentEl.getBoundingClientRect();
+	const childRect = childEl.getBoundingClientRect();
+	return (
+		childRect.top >= parentRect.top &&
+		childRect.left >= parentRect.left &&
+		childRect.bottom <= parentRect.bottom &&
+		childRect.right <= parentRect.right
+	);
+}
 
-	defineExpose<{ refresh: () => void; search: (virtual: Book[]) => void }>({
-		refresh() {
-			BooksData.virtual();
-		},
-		search(virtual: Book[]) {
-			BooksData.virtual(new LocalVirtualPage(virtual, BooksData.pageInfo));
-		}
+
+watchEffect(() => {
+	const row = Math.ceil(Math.max(0, BooksData.pageInfo.totalSize) / column.value);
+	clientScrollHeight.value = `${(row * (gap.value + height) - gap_y)}px`;
+});
+
+
+function getRange(): number[] {
+	const col = column.value;
+	const topRow = Math.floor((clientTop.value + gap.value) / (gap.value + height));//在顶部的行数
+	const start: number = Math.max(0, topRow - 1) * col;
+	const end: number = (Math.ceil(
+		(clientTop.value + gap.value + clientHeight.value) / (gap.value + height)) + 1) * col;//计算当前区域底部行
+	return [start, BooksData.pageInfo.totalSize !== -1 ? Math.min(end, BooksData.pageInfo.totalSize) : end];
+	
+}
+
+function updateToView(): void {
+	const [start, end] = getRange();
+	BooksData.updateToView(start, end).then(() => {
 	});
+}
 
-	const show = (index: number): boolean => {
-		const cur: number = Math.floor(index / column.value);
-		return cur >= up.value - 2 && cur <= down.value + 2;
-	};
-
-	function load(): void {
-		const size =
-			(Math.ceil((el.value.clientHeight ?? 0) / 300) *
-				Math.ceil((el.value.clientWidth ?? 0) / 200)) <<
-			1;
-		BooksData.pageUpdate(page => ((page.pageSize = size), page));
-		BooksData.refresh();
-	}
-
-	function flush() {
-		if (Assert.isNull(el.value)) return;
-		column.value = Math.floor(el.value.clientWidth / 200);
-		row.value = Math.ceil(el.value.clientHeight / 300);
-		space.value = (el.value.clientWidth - column.value * 200) / (column.value + 1);
-		up.value = Math.floor(el.value.offsetTop / (300 + space.value));
-		down.value = up.value + row.value;
-	}
-
-	const row: Ref<number> = ref<number>(0);
-	const column: Ref<number> = ref<number>(0);
-	const space: Ref<number> = ref<number>(0);
-	const fl: (...args: unknown[]) => any = throttle(flush, 200);
-	onMounted(() => {
-		fl();
-		load();
-		const resizeObserver: ResizeObserver = new ResizeObserver(entries => {
-			fl();
-		});
-		resizeObserver.observe(el.value);
-	});
 </script>
 
 <style scoped>
-	@import "@/views/reader/AllBookChild/btn_top.css";
+@import "@/views/reader/AllBookChild/btn_top.css";
 
-	.content {
-		position: relative;
-	}
+.content {
+    overflow-y: auto;
+    height: v-bind(clientScrollHeight);
+    position: relative;
+}
 
-	.child {
-		position: absolute;
-	}
+._____boxed {
+    height: v-bind(clientScrollHeight);
+    width: 100%;
+}
 
-	.content,
-	.child {
-		height: 100%;
-		scroll-behavior: smooth;
-		overflow: auto;
-		transition: all 0.5ms linear;
-	}
+
+.child {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.list-move, /* 对移动中的元素应用的过渡 */
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.5s linear;
+}
+
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+}
+
+/* 确保将离开的元素从布局流中删除
+  以便能够正确地计算移动的动画。 */
+.list-leave-active {
+}
+
 </style>

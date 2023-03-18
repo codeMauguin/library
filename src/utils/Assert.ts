@@ -62,8 +62,9 @@ export class Assert {
 	 * @param {string} target - 要测试的字符串。
 	 * @returns 一个布尔值。
 	 */
-	public static isNumber(target: string | number): boolean {
-		return Assert.notNull(target) && /^([1-9])[0-9]*$/.test(target as string);
+	public static isNumber(target: string | number | any): boolean {
+		return ((Assert.isString(target) && /^([1-9])[0-9]*$/.test(target as string)) || Assert.notNull(
+			target) && typeof target === "number");
 	}
 	
 	/**
@@ -89,30 +90,45 @@ export class Assert {
  *
  * 1. `fn`：节流的函数。
  * 2. `delay`：两次执行之间等待的毫秒数
+ *
+ * //如果多次点击我保证最后一次点击会继续更新一次，防止之前一次中确实有一次实际更新没有被加载
  * @param {Function} fn - 要节流的函数。
  * @param {number} [delay=1000] - 执行函数之前等待的时间（以毫秒为单位）。
+ * @param max 超过这么多次后会继续执行
  */
-export function throttle<R = any | null>(fn: (...args: any[]) => any, delay: number = 1000): (...args: unknown[]) => R {
+export function throttle<R = any | null>(fn: (...args: any[]) => any, delay: number = 1000,
+										 max: number                                = 10): (...args: unknown[]) => R {
 	let timer: unknown | null = null;
 	let count = 0;
+	
+	function clear(this: any, ...args: any[]): void {
+		
+		if (count > max) {
+			Promise.resolve()
+				   .then(() => {
+					   count = 0;
+					   return fn.apply(this, args);
+				   })
+				   .then(() => {
+					   clear.apply(this, args);
+				   });
+		} else {
+			timer = null;
+			count = 0;
+		}
+	}
+	
+	
 	return function (this: any, ...args: any[]): R {
 		if (timer != null || count > 0) {
-			++count;
+			++count;//记录当前阻塞中有多少次请求进来
 			return <R>(<unknown>null);
 		}
+		
 		timer = setTimeout(() => {
-			if (count > 0) {
-				Promise.resolve()
-					   .then(() => fn.apply(this, args))
-					   .finally(() => {
-						   timer = null;
-						   count = 0;
-					   });
-			} else {
-				timer = null;
-			}
+			clear.apply(this, args);
 		}, delay);
-		return fn.apply(this, args);
+		return fn.apply(this, args);//进来优先执行
 	};
 }
 
@@ -144,7 +160,8 @@ export function isPromiseLike<T>(obj: any): obj is PromiseLike<T> {
  * @param {any} finalResult - 任何
  */
 export function isSymbol(finalResult: any): finalResult is symbol {
-	return typeof finalResult==="symbol";
+	return typeof finalResult === "symbol";
 }
+
 export const isObject = (target: unknown): boolean => Assert.notNull(
 	target) && (typeof target === "object" || target instanceof Object);

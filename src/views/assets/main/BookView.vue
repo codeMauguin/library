@@ -68,7 +68,8 @@
 					<el-card>
 						<template
 							v-for="(mock, index) in pageInstance!.view"
-							v-if="pageInstance && pageInstance.view.length > 0">
+							v-if="pageInstance && pageInstance.view.length > 0"
+							:key="mock.id">
 							<my-comment
 								:data="mock"
 								@update-view="updateView"
@@ -118,20 +119,20 @@
 	</div>
 </template>
 <script lang="ts" setup>
-	import type ResponseApi from "@/axios/ResponseApi";
-	import type { Page } from "@/components/Pages/Page2";
-	import { useReaderStore } from "@/stores/readerStore";
-	import { useShopStore } from "@/stores/ShopStore";
-	import type Book from "@/types/Book";
-	import type CommentType from "@/types/CommentType";
-	import { closed, onsubmit, openShop } from "@/utils/Gloab";
-	import { default as MyComment } from "@/views/reader/Comments/Comment.vue";
-	import Drawer from "@/views/reader/Drawer.vue";
-	import type { AxiosResponse } from "axios";
-	import { ElDivider, ElEmpty, ElImage, ElMessage, ElMessageBox, ElSpace } from "element-plus";
-	import type { Ref, UnwrapNestedRefs } from "vue";
+import type ResponseApi                                                  from "@/axios/ResponseApi";
+import type { Page }                                                     from "@/components/Pages/Page2";
+import { useReaderStore }                                                from "@/stores/readerStore";
+import { useShopStore }                                                  from "@/stores/ShopStore";
+import type Book                                                         from "@/types/Book";
+import type CommentType                                                  from "@/types/CommentType";
+import { closed, onsubmit, openShop }                                    from "@/utils/Gloab";
+import { default as MyComment }                                          from "@/views/reader/Comments/Comment.vue";
+import Drawer                                                            from "@/views/reader/Drawer.vue";
+import type { AxiosResponse }                                            from "axios";
+import { ElDivider, ElEmpty, ElImage, ElMessage, ElMessageBox, ElSpace } from "element-plus";
+import type { Ref, UnwrapNestedRefs }                                    from "vue";
 
-	const data: UnwrapNestedRefs<Book> = reactive<Book>({
+const data: UnwrapNestedRefs<Book> = reactive<Book>({
 		id: "",
 		name: "",
 		author: "",

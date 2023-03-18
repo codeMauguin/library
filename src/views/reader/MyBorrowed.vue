@@ -1,87 +1,88 @@
 <!-- @format -->
 
 <template>
-	<div class="_body">
-		<blockquote class="blockquote" style="--block: #73767a;width: 100%">
-			<i class="iconfont icon-tishi"/> 图书续签只有一次机会
-		</blockquote>
-		<div style="flex: 1 1 auto;width: 100%;height: 90%;overflow:auto">
-			<el-table
-					:cell-style="{ 'text-align': 'center' }"
-					:data="pageInstance.view"
-					:header-cell-style="{ 'text-align': 'center' }"
-					:highlight-current-row="true"
-					:row-class-name="queryState"
-					border
-					table-layout="auto"
-					@filter-change="filterChange">
-				<template #empty>
-					<el-empty
-							:description="useUserInfo.state ? '没有借阅信息' : '没有登录'"></el-empty>
-				</template>
-				<el-table-column
-						label="订单编号"
-						prop="orderId"
-						sortable/>
-				<el-table-column
-						label="书籍编号"
-						prop="bookId"
-						sortable/>
-				<el-table-column
-						label="借阅时间"
-						prop="createTime"
-						sortable></el-table-column>
-				<el-table-column
-						label="归还时间"
-						prop="returnTime"
-						sortable></el-table-column>
-				<el-table-column
-						:filter-method="filterState"
-						:filters="[
+    <div class="_body">
+        <blockquote class="blockquote" style="--block: #73767a;width: 100%">
+            <i class="iconfont icon-tishi"/> 图书续签只有一次机会
+        </blockquote>
+        <div style="flex: 1 1 auto;width: 100%;height: 90%;overflow:auto">
+            <el-table
+                    :cell-style="{ 'text-align': 'center' }"
+                    :data="pageInstance.view"
+                    :header-cell-style="{ 'text-align': 'center' }"
+                    :highlight-current-row="true"
+                    :row-class-name="queryState"
+                    border
+                    table-layout="auto"
+                    @filter-change="filterChange">
+                <template #empty>
+                    <el-empty
+                            :description="useUserInfo.state ? '没有借阅信息' : '没有登录'"></el-empty>
+                </template>
+                <el-table-column
+                        label="订单编号"
+                        prop="orderId"
+                        sortable/>
+                <el-table-column
+                        label="书籍编号"
+                        prop="bookId"
+                        sortable/>
+                <el-table-column
+                        label="借阅时间"
+                        prop="createTime"
+                        sortable></el-table-column>
+                <el-table-column
+                        label="归还时间"
+                        prop="returnTime"
+                        sortable></el-table-column>
+                <el-table-column
+                        :filter-method="filterState"
+                        :filters="[
 						{ text: '借阅中', value: '0' },
 						{ text: '已归还', value: '1' },
 						{ text: '超时', value: '-1' }
 					]"
-						:sort-by="sort"
-						column-key="status"
-						label="状态"
-						sortable>
-					<template #default="{ row }">
-						<el-tag :type="tagType(row.status)" hit size="large">{{ tagValue(row.status) }}
-						</el-tag>
-					</template>
-				</el-table-column>
-				<el-table-column label="操作">
-					<template #default="{ row }">
-						<div style=" display: flex; align-items: center;justify-content: center; gap: 10px">
-							<button class="cssbuttons-io-button" @click="() => returnBook(row)"> 还书
-								<div class="icon">
-									<svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-										<path d="M0 0h24v24H0z" fill="none"></path>
-										<path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
-											  fill="currentColor"></path>
-									</svg>
-								</div>
-							</button>
-							<el-button :disabled="row.renewal>0||row.status===1" class="xq_btn"
-									   @click="renewal(row)"> 续期
-							</el-button>
-						</div>
-					</template>
-				</el-table-column>
-			</el-table>
-		</div>
-		<div class="footer">
-			<el-pagination
-					v-model:current-page="pageInstance.pageInfo.currentIndex"
-					v-model:page-size="pageInstance.pageInfo.pageSize"
-					v-model:total="pageInstance.pageInfo.totalSize"
-					:page-sizes="[5, 10,15]"
-					background
-					layout="total,sizes,prev, pager, next,jumper"
-					@current-change="index => pageInstance.next(index)"/>
-		</div>
-	</div>
+                        :sort-by="sort"
+                        column-key="status"
+                        label="状态"
+                        sortable>
+                    <template #default="{ row }">
+                        <el-tag :type="tagType(row.status)" hit size="large">{{ tagValue(row.status) }}
+                        </el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作">
+                    <template #default="{ row }">
+                        <div style=" display: flex; align-items: center;justify-content: center; gap: 10px">
+                            <el-button :disabled="row.status===1" class="cssbuttons-io-button"
+                                       @click="() => returnBook(row)"> 还书
+                                <div class="icon">
+                                    <svg height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M0 0h24v24H0z" fill="none"></path>
+                                        <path d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
+                                              fill="currentColor"></path>
+                                    </svg>
+                                </div>
+                            </el-button>
+                            <el-button :disabled="row.renewal>0||row.status===1" class="xq_btn"
+                                       @click="renewal(row)"> 续期
+                            </el-button>
+                        </div>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
+        <div class="footer">
+            <el-pagination
+                    v-model:current-page="pageInstance.pageInfo.currentIndex"
+                    v-model:page-size="pageInstance.pageInfo.pageSize"
+                    v-model:total="pageInstance.pageInfo.totalSize"
+                    :page-sizes="[5, 10,15]"
+                    background
+                    layout="total,sizes,prev, pager, next,jumper"
+                    @current-change="index => pageInstance.next(index)"/>
+        </div>
+    </div>
 </template>
 
 <script lang="ts" setup>
@@ -89,9 +90,7 @@ import instance                                                                 
 import HttpApi                                                                           from "@/axios/HttpURL";
 import type ResponseApi                                                                  from "@/axios/ResponseApi";
 import type {
-	LoadPage,
-	PageData,
-	PageInstance
+	LoadPage, PageData, PageInstance
 }                                                                                        from "@/components/Pages/Page2";
 import {
 	Page

@@ -1,13 +1,12 @@
-
 <template>
     <div class="body-parnet">
-        <el-avatar
-                :size="60"
-                :src="data.user.headerImage">
-            <img
-                    :alt="data.user.username"
-                    src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"/>
-        </el-avatar>
+        <!--        <el-avatar-->
+        <!--                :size="60"-->
+        <!--                :src="data.user.headerImage">-->
+        <!--            <img-->
+        <!--                    :alt="data.user.username"-->
+        <!--                    src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"/>-->
+        <!--        </el-avatar>-->
         <div class="reader-body">
             <div class="reader-header">
                 <div style="display: flex; align-items: center">
@@ -21,27 +20,32 @@
                 </div>
                 <div class="operator">
                     <el-space>
-                       <el-badge :value="likeCount">
-                           <label class="container">
-                               <input v-model="isLike" :disabled="!userInfoStore.state"  type="checkbox" @change="like">
-                               <div class="checkmark">
-                                   <svg fill="none" viewBox="0 0 24 24">
-                                       <path d="M8 10V20M8 10L4 9.99998V20L8 20M8 10L13.1956 3.93847C13.6886 3.3633 14.4642 3.11604 15.1992 3.29977L15.2467 3.31166C16.5885 3.64711 17.1929 5.21057 16.4258 6.36135L14 9.99998H18.5604C19.8225 9.99998 20.7691 11.1546 20.5216 12.3922L19.3216 18.3922C19.1346 19.3271 18.3138 20 17.3604 20L8 20" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3"></path>
-                                   </svg>
-                               </div>
-                           </label>
-                       </el-badge>
+                        <el-badge :value="likeCount">
+                            <label class="container">
+                                <input v-model="isLike" :disabled="!userInfoStore.state" type="checkbox" @change="like">
+                                <div class="checkmark">
+                                    <svg fill="none" viewBox="0 0 24 24">
+                                        <path d="M8 10V20M8 10L4 9.99998V20L8 20M8 10L13.1956 3.93847C13.6886 3.3633 14.4642 3.11604 15.1992 3.29977L15.2467 3.31166C16.5885 3.64711 17.1929 5.21057 16.4258 6.36135L14 9.99998H18.5604C19.8225 9.99998 20.7691 11.1546 20.5216 12.3922L19.3216 18.3922C19.1346 19.3271 18.3138 20 17.3604 20L8 20"
+                                              stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="1.3"></path>
+                                    </svg>
+                                </div>
+                            </label>
+                        </el-badge>
                     </el-space>
                     <el-space>
                         <el-badge :value="unLikeCount">
-                        <label class="container" style="transform: rotate(180deg) translateY(40%);">
-                            <input v-model="isNotLike" :disabled="!userInfoStore.state"  type="checkbox" @change="unLike">
-                            <div class="checkmark">
-                                <svg fill="none" viewBox="0 0 24 24">
-                                    <path d="M8 10V20M8 10L4 9.99998V20L8 20M8 10L13.1956 3.93847C13.6886 3.3633 14.4642 3.11604 15.1992 3.29977L15.2467 3.31166C16.5885 3.64711 17.1929 5.21057 16.4258 6.36135L14 9.99998H18.5604C19.8225 9.99998 20.7691 11.1546 20.5216 12.3922L19.3216 18.3922C19.1346 19.3271 18.3138 20 17.3604 20L8 20" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3"></path>
-                                </svg>
-                            </div>
-                        </label>
+                            <label class="container" style="transform: rotate(180deg) translateY(40%);">
+                                <input v-model="isNotLike" :disabled="!userInfoStore.state" type="checkbox"
+                                       @change="unLike">
+                                <div class="checkmark">
+                                    <svg fill="none" viewBox="0 0 24 24">
+                                        <path d="M8 10V20M8 10L4 9.99998V20L8 20M8 10L13.1956 3.93847C13.6886 3.3633 14.4642 3.11604 15.1992 3.29977L15.2467 3.31166C16.5885 3.64711 17.1929 5.21057 16.4258 6.36135L14 9.99998H18.5604C19.8225 9.99998 20.7691 11.1546 20.5216 12.3922L19.3216 18.3922C19.1346 19.3271 18.3138 20 17.3604 20L8 20"
+                                              stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round"
+                                              stroke-width="1.3"></path>
+                                    </svg>
+                                </div>
+                            </label>
                         </el-badge>
                     </el-space>
 
@@ -58,14 +62,7 @@
             </div>
             <span class="time">
 				{{
-								`${data.timestamp.getFullYear()}年${
-										data.timestamp.getMonth() + 1
-								}月${data.timestamp.getDate()}日
-        ${data.timestamp.getHours()}:${
-										data.timestamp.getMinutes() >= 10
-												? data.timestamp.getMinutes()
-												: "0" + data.timestamp.getMinutes()
-								}:${data.timestamp.getSeconds()}`
+								formatTime(data.timestamp)
                 }}
 			</span>
             <el-space
@@ -111,12 +108,11 @@
                 <template #body>
                     <template
                             v-for="(item, index) in data.children"
-                            :key="item!.id">
+                            :key="item.id">
                         <comment
                                 :data="item"
                                 @updateView="d => emits('updateView', d)"
                                 @delete-comment="id => emits('deleteComment', id)"/>
-                        <el-divider v-if="index !== data.child - 1"/>
                     </template>
                 </template>
             </MyCollapse>
@@ -193,6 +189,21 @@ function like() {
 	});
 }
 
+function formatTime(time: Date): string {
+	console.log(time);
+	const now = new Date();
+	const diff: number = (now.getTime() - time.getTime()) / 1000; // 计算时间差，单位为秒
+	if (diff < 60) {
+		return "刚刚";
+	} else if (diff < 60 * 60) {
+		return `${Math.floor(diff / 60)}分钟前`;
+	} else if (diff < 60 * 60 * 24) {
+		return `${Math.floor(diff / 60 / 60)}小时前`;
+	} else {
+		return `${Math.floor(diff / 60 / 60 / 24)}天前`;
+	}
+}
+
 function unLike() {
 	if (!userInfoStore.state) {
 		messageLinkTo("尚未登陆", "/login");
@@ -236,12 +247,13 @@ function deleteComment() {
 						 confirmButtonText: "删除"
 					 })
 			.then(() => {
-				promise(`${HttpURL.deleteComment}/${props.data.id}/${userInfoStore.user.id}`)
+				patch(`${HttpURL.deleteComment}/${props.data.id}/${userInfoStore.user.id}`)
 					.then(value => {
 						ElMessage.success("删除成功");
 						emits("deleteComment", props.data.id);
 					})
 					.catch(error => {
+						console.log(error);
 						ElMessage.warning("删除失败:" + error.data.error);
 					});
 			})
@@ -338,7 +350,10 @@ async function handle(): Promise<void> {
 <style scoped>
 @import url("@/views/reader/Comments/btn_del.css");
 @import url("@/views/css/check_like.css");
+
 .body-parnet {
+    border: 1px solid #ccc;
+    padding: 10px;
     display: -webkit-flex;
     display: flex;
     flex-wrap: nowrap;
@@ -379,6 +394,7 @@ async function handle(): Promise<void> {
 }
 
 h3 {
+   
     cursor: default;
     user-select: none;
 }

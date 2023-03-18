@@ -40,6 +40,10 @@
     </div>
 </template>
 <script lang="ts" setup>
+/**
+ * > 优化了长列表性能，解决上一个版本的每次点击清除都会去请求下一页问题，完全根据需要可视进行加载
+ * todo 设置图片缓存
+ */
 import LongPage                    from "@/components/Pages/LongPage";
 import type { LoadPage, PageData } from "@/components/Pages/Page2";
 import router                      from "@/router";
@@ -188,7 +192,7 @@ function isChildElementInViewport(parentEl: HTMLElement, childEl: HTMLElement) {
 	);
 }
 
-
+//收集元素变化计算页面长度变化
 watchEffect(() => {
 	const row = Math.ceil(Math.max(0, BooksData.pageInfo.totalSize) / column.value);
 	clientScrollHeight.value = `${(row * (gap.value + height) - gap_y)}px`;
@@ -197,10 +201,10 @@ watchEffect(() => {
 
 function getRange(): number[] {
 	const col = column.value;
-	const topRow = Math.floor((clientTop.value + gap.value) / (gap.value + height));//在顶部的行数
+	const topRow = Math.floor((clientTop.value + gap_y) / (gap_y + height));//在顶部的行数
 	const start: number = Math.max(0, topRow - 1) * col;
 	const end: number = (Math.ceil(
-		(clientTop.value + gap.value + clientHeight.value) / (gap.value + height)) + 1) * col;//计算当前区域底部行
+		(clientTop.value + gap_y + clientHeight.value) / (gap_y + height)) + 1) * col;//计算当前区域底部行
 	return [start, BooksData.pageInfo.totalSize !== -1 ? Math.min(end, BooksData.pageInfo.totalSize) : end];
 	
 }

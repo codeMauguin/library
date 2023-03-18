@@ -164,6 +164,7 @@ function submitLogin(formEl: FormInstance | null): void {
 						});
 					return true;
 				}).catch((value) => {
+			getCode();
 			user.password = "";
 			closeLoading();
 			ElNotification.error({

@@ -1,4 +1,4 @@
 /** @format */
 
-type ResponseApi<T> = { code: number; error: string; data: T };
+type ResponseApi<T> = Readonly<{ code: number; error: string; data: T }>;
 export default ResponseApi;

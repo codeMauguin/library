@@ -21,7 +21,8 @@
     "login": [
       "/user",
       "/reader/**",
-      "/admin/**"
+      "/admin/**",
+      "/main/statistics"
     ],
     "white": [
       "/login",

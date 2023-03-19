@@ -7,20 +7,12 @@
                 :hide-after="0"
                 transition="el-fade-in-linear">
             <div class="book-view">
-                <el-image
-                        :src="prop.image"
-                        :z-index="999"
-                        fit="cover"
-                        style="width: 200px; height: 300px"
-                        @error="loading=false"
-                        @load="loading=false"
-                        @show="loading=false">
-                    <template #placeholder>
-                        <div style="text-align: center;line-height: 300px"> {{ prop.name }}</div>
+                <el-skeleton :loading="loading" animated>
+                    <template #template>
+                        <el-skeleton-item class="book-view" variant="image"/>
                     </template>
-                </el-image>
-
-
+                </el-skeleton>
+                <img :src="image" alt="" class="book-view" @load="loader"/>
                 <div class="zhe">
                     <div class="gou">
                         <el-tooltip
@@ -72,12 +64,15 @@
 <script lang="ts" setup>
 import { useUserInfoStore } from "@/stores/counter";
 import type Book            from "@/types/Book";
-import { ElImage }          from "element-plus";
+import LRUCache             from "@/utils/LRUCache";
 import { ElTooltip }        from "element-plus";
 import type { Ref }         from "vue";
 
 const loading: Ref<boolean> = ref(true);
-
+const image: Ref<string | ArrayBuffer | null> = ref("");
+const loader = () => {
+	loading.value = false;
+};
 const props = defineProps<{
 	prop: Book;
 	cancel: (book: Book) => void;
@@ -88,7 +83,19 @@ const store = useUserInfoStore();
 const commentStore = useCommentStore();
 const data = commentStore
 	.getBookComment(props.prop.id, store.user.id);
-
+const cache: string | undefined = LRUCache.get(props.prop.image as string);
+if (cache === undefined) {
+    fetch(props.prop.image as string).then(value => value.blob()).then(value => {
+        const reader: FileReader = new FileReader();
+        reader.readAsDataURL(value);
+        reader.onloadend = function () {
+            image.value = reader.result;
+            LRUCache.put(props.prop.image as string, image.value as string);
+        };
+    });
+} else {
+    image.value = cache;
+}
 const emits = defineEmits<{
 	(e: "addAShoppingCart", book: Book): void;
 }>();

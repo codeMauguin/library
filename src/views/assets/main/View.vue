@@ -4,7 +4,7 @@
     <public-menu
             :balance="readerStore.borrowALibraryCard.total - readerStore.borrowALibraryCard.borrowed"
             :data="{ isCollapse, ElMenus: store.isAdmin ? adminAside : readerAside }"
-            home="/main"
+            :home="store.state?'/main':'/reader/allBooks'"
             @closed="closed">
         <template #header>
             <tags-pilot style="height: 100%"/>
@@ -28,9 +28,9 @@ onBeforeMount(() => {
 	if (store.state) {
 		if (!store.isAdmin) {
 			getBorrowedCard(store.user.id);
-		}else {
-        
-        }
+		} else {
+		
+		}
 	}
 });
 </script>

@@ -40,6 +40,8 @@
     </div>
 </template>
 <script lang="ts" setup>
+import type ResponseApi            from "@/axios/ResponseApi";
+
 /**
  * > 优化了长列表性能，解决上一个版本的每次点击清除都会去请求下一页问题，完全根据需要可视进行加载
  * todo 设置图片缓存
@@ -52,6 +54,7 @@ import { useShopStore }            from "@/stores/ShopStore";
 import type Book                   from "@/types/Book";
 import { Assert }                  from "@/utils";
 import { default as BookView }     from "@/views/reader/Book.vue";
+import type { AxiosResponse }      from "axios";
 import { watchEffect }             from "vue";
 import type { Ref }                from "vue";
 import { ref }                     from "vue";
@@ -88,7 +91,7 @@ const BooksData: LongPage<Book> = new LongPage<Book>(
 						group: "BOOK"
 					}
 				)
-				.then(({data: {data}}) => data);
+				.then(({data: {data}}: AxiosResponse<ResponseApi<PageData<Book>>>) => data);
 		}
 	})()
 );

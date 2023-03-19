@@ -21,7 +21,7 @@ type Book = {
 	info: string;
 	category: string;
 	press: string;
-	image: string;
+	image: string | ArrayBuffer ;
 	inventory: Inventory;
 	state: number;
 	readonly comments: number;

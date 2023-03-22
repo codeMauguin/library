@@ -62,18 +62,39 @@
 									<el-tooltip
 											v-if="row.status !== 1"
 											content="标记归还">
-										<el-button
-												class="iconfont icon-bianji"
-												@click="flag(row, 1)"/>
+                      <el-popconfirm
+															cancel-button-text="取消"
+															cancel-button-type="danger"
+															confirm-button-text="归还"
+															confirm-button-type="primary"
+                              title="是否归还当前用户图书?"
+															@confirm="flag(row, 1)">
+                          <template #reference>
+                              <el-button
+                                      class="iconfont icon-bianji"
+                                     />
+                          </template>
+                      </el-popconfirm>
+									
 									</el-tooltip>
 									
 									<el-tooltip
 											v-if="row.status !== -1"
 											content="标记超时">
-										<el-button
-												class="iconfont icon-iconzhengli-"
-												style="font-size: 20px"
-												@click="flag(row, -1)"/>
+                      <el-popconfirm
+                              cancel-button-text="取消"
+                              cancel-button-type="danger"
+                              confirm-button-text="超时"
+                              confirm-button-type="primary"
+                              title="是否归标记超时当前图书?"
+                              @confirm="flag(row, -1)">
+                          <template #reference>
+                              <el-button
+                                      class="iconfont icon-iconzhengli-"
+                                      style="font-size: 20px"
+                              />
+                          </template>
+                      </el-popconfirm>
 									</el-tooltip>
 								</el-button-group>
 								<span v-else>无</span>

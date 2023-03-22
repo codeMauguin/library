@@ -15,4 +15,5 @@ public class order implements Serializable {
 	private LocalDateTime endTime;
 	private Integer status;
 	private String reason;
+	
 }

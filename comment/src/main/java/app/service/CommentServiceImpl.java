@@ -63,7 +63,7 @@ public class CommentServiceImpl implements CommentService {
 		comment.setUser_id(commentRequest.getUserId());
 		comment.setBookId(commentRequest.getBookId());
 		comment.setContent(commentRequest.getContent());
-		comment.setParent_id(commentRequest.getParentId());
+		comment.setParentId(commentRequest.getParentId());
 		Boolean commit = commentDao.commit(comment);
 		if (Boolean.TRUE.equals(commit)) return id;
 		return null;
@@ -122,12 +122,12 @@ public class CommentServiceImpl implements CommentService {
 	}
 	
 	private List<Long> query(Long id) {
-		// 查出当前的自id
+		// 查出当前的子节点id
 		List<Long> longs = commentDao.queryChild(id);
 		
-		return Stream.concat(longs.stream().flatMap(
+		return Stream.concat(Stream.of(id),Stream.concat(longs.stream().flatMap(
 							 i -> query(i).stream()
-												   ), longs.stream())
+																			   ), longs.stream()))
 					 .toList();
 	}
 }

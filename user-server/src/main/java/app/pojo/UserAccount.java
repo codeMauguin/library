@@ -16,5 +16,5 @@ public class UserAccount implements Serializable {
 	@JsonIgnore
 	private String salt;
 	private String password;
-	private String status;
+	
 }

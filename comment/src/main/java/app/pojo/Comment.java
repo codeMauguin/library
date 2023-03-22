@@ -18,8 +18,8 @@ public class Comment implements Serializable {
 	private Long bookId;
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)
 	private Integer child_size;
-	private Long parent_id;
-	private Long root_id;
+	private Long parentId;
+	private Long rootId;
 	@JsonIgnore
 	private Long user_id;
 	@JsonProperty(access = JsonProperty.Access.READ_ONLY)

@@ -10,9 +10,9 @@
                #{comment.bookId}    as bookId,
                #{comment.user_id}   as user_id,
                #{comment.content}   as content,
-               #{comment.parent_id} as parent_id,
-               IFNULL((SELECT root_id FROM lb_comments WHERE id = #{comment.parent_id}),
-                      #{comment.parent_id})
+               #{comment.parentId} as parent_id,
+               IFNULL((SELECT root_id FROM lb_comments WHERE id = #{comment.parentId}),
+                      #{comment.parentId})
                                     as rootId
     </insert>
     <delete id="deleteComment">

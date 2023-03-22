@@ -13,7 +13,7 @@ import java.util.List;
 public class CorsConfig {
 	
 	private final String[] origins = {"http://localhost", "http://127.0.0.1",
-			"http://192.168.100.2"};
+			"http://192.168.100.139"};
 	private final String[] headers = {
 			"bl", "Access-Control-Allow-Origin",
 			"Access-Control-Allow-Headers",

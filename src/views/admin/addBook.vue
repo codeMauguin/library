@@ -197,8 +197,11 @@ async function commit(): Promise<void> {
 								">
 								<el-tooltip :content="autoAdd?'自动确定':'手动添加'">
 									<label class="switch">
-										<input checked type="checkbox" @change.stop="autoAdd=!autoAdd"/>
-										<span class="slider"></span>
+										<input  type="checkbox" @change.stop="autoAdd=!autoAdd"/>
+                      <div class="slider">
+                          <span>On</span>
+                          <span>Off</span>
+                      </div>
 									</label>
 								</el-tooltip>
 							</div>
@@ -280,58 +283,89 @@ async function commit(): Promise<void> {
 
 /* The switch - the box around the slider */
 .switch {
-    font-size: 1rem;
+    font-size: 17px;
     position: relative;
     display: inline-block;
-    width: 4em;
+    width: 100px;
     height: 2em;
 }
 
-/* Hide default HTML checkbox */
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
 
 /* The slider */
 .slider {
     position: absolute;
     cursor: pointer;
-    inset: 0;
-    background-color: #eee;
-    -webkit-transition: 0.4s;
-    transition: 0.4s;
-    border-radius: 0.5em;
-    -webkit-box-shadow: 0 0.2em #dfd9d9;
-    box-shadow: 0 0.2em #dfd9d9;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #fff;
+    color: #000;
+    font-weight: 600;
+    border-radius: 30px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-pack: distribute;
+    justify-content: space-around;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-transition: .4s;
+    transition: .4s;
 }
+
 
 .slider:before {
     position: absolute;
+    content: "On";
+    height: 90%;
+    width: 48%;
+    left: 2%;
+    border-radius: 20px;
+    background-color: white;
+    color: green;
+    display: grid;
+    -ms-flex-line-pack: center;
+    align-content: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 -1px 0 0 rgba(0, 0, 0, 0.1) inset, 0 -1.31em 1.31em -1.31em rgba(0, 0, 0, 0.3) inset, 0 0 1px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 -1px 0 0 rgba(0, 0, 0, 0.1) inset, 0 -1.31em 1.31em -1.31em rgba(0, 0, 0, 0.3) inset, 0 0 1px 0 rgba(0, 0, 0, 0.1);
+    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.15);
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+.slider:after {
     content: "";
-    height: 1.5em;
-    width: 1.4em;
-    border-radius: 0.3em;
-    left: 0.3em;
-    bottom: 0.7em;
-    background-color: lightsalmon;
-    -webkit-transition: 0.4s;
-    transition: 0.4s;
-    -webkit-box-shadow: 0 0.4em #bcb4b4;
-    box-shadow: 0 0.4em #bcb4b4;
+    position: absolute;
+    top: -7px;
+    left: -7px;
+    right: -7px;
+    bottom: -7px;
+    border-radius: 1.71em;
+    background-image: -webkit-gradient(linear, left bottom, left top, from(rgba(0, 0, 0, 0.06)), to(rgba(0, 0, 0, 0.1)));
+    background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.1));
+    z-index: -1;
 }
 
-.slider:hover::before {
-    -webkit-box-shadow: 0 0.2em #bcb4b4;
-    box-shadow: 0 0.2em #bcb4b4;
-    bottom: 0.5em;
+.switch input:checked + .slider {
+    background-color: #21f3a3;
+    color: #fff;
 }
 
-input:checked + .slider:before {
-    -webkit-transform: translateX(2em);
-    -ms-transform: translateX(2em);
-    transform: translateX(2em);
-    background: lightgreen;
+
+.switch input:checked + .slider:before {
+    content: "Off";
+    -webkit-transform: translateX(100%);
+    -ms-transform: translateX(100%);
+    transform: translateX(100%);
+    color: red;
+
+}
+
+.switch input {
+    display: none;
 }
 </style>

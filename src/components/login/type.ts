@@ -6,6 +6,6 @@ export function valid(rule: any, value: any, callback: (args?: any) => void): vo
 	}
 }
 
-export const user = reactive({
+export const user:Record<string, any> = reactive({
 								 username: "", password: "", code: ""
 							 });

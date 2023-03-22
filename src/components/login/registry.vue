@@ -1,101 +1,122 @@
 <!-- @format -->
 
 <template>
-	<div>
-		<h1> Registry </h1>
-		<el-form
-				ref="ruleFormRef"
-				:model="user"
-				:rules="rules">
-			<el-form-item
-					class="form-group"
-					prop="username">
-				<label for="username">username</label>
-				<el-input
-						id="username"
-						v-model="user.username"
-						autocomplete="off"
-						size="large"
-						type="text">
-					<template #prefix>
-						<i class="iconfont icon-yonghuming"></i>
-					</template>
-				</el-input>
-			</el-form-item>
-			<el-form-item
-					class="form-group"
-					prop="password">
-				<label for="password">Password</label>
-				<el-input
-						id="password"
-						v-model="user.password"
-						:show-password="true"
-						autocomplete="new-password"
-						size="large">
-					<template #prefix>
-						<i class="iconfont icon-mima"></i>
-					</template>
-				</el-input>
-			</el-form-item>
-		</el-form>
-		<button class="learn-more iconfont icon-submit" style="float: right" @click="registry">
-			注册
-		</button>
-	</div>
+    <div>
+        <h1> Registry </h1>
+        <el-form
+                ref="ruleFormRef"
+                :model="user"
+                :rules="rules">
+            <el-form-item
+                    class="form-group"
+                    prop="username">
+                <label for="username">username</label>
+                <el-input
+                        id="username"
+                        v-model="user.username"
+                        autocomplete="off"
+                        size="large"
+                        type="text">
+                    <template #prefix>
+                        <i class="iconfont icon-yonghuming"></i>
+                    </template>
+                </el-input>
+            </el-form-item>
+            <el-form-item
+                    class="form-group"
+                    prop="password">
+                <label for="password">Password</label>
+                <el-input
+                        id="password"
+                        v-model="user.password"
+                        :show-password="true"
+                        autocomplete="new-password"
+                        size="large">
+                    <template #prefix>
+                        <i class="iconfont icon-mima"></i>
+                    </template>
+                </el-input>
+            </el-form-item>
+        </el-form>
+        <button class="learn-more iconfont icon-submit" style="float: right" @click="registry">
+            注册
+        </button>
+    </div>
 </template>
 <script lang="ts" setup>
 import instance                         from "@/axios";
+import type ResponseApi                 from "@/axios/ResponseApi";
 import { user, valid }                  from "@/components/login/type";
+import router                           from "@/router";
+import { useUserInfoStore }             from "@/stores/counter";
 import oncePromise                      from "@/utils/OncePromise";
+import type { AxiosResponse }           from "axios";
 import type { FormInstance, FormRules } from "element-plus";
 import type { Ref }                     from "vue";
 
 const ruleFormRef: Ref<FormInstance | null> = ref<FormInstance | null>(null);
-const rules = reactive<FormRules>({
-									  username: [
-										  {
-											  validator: valid,
-											  trigger  : "valid"
-										  }
-									  ],
-									  password: [
-										  {
-											  validator: valid,
-											  trigger  : "valid"
-										  }
-									  ]
-								  });
-const user = reactive({
-						  username: "",
-						  password: ""
-					  });
+const rules: FormRules = reactive<FormRules>({
+												 username: [
+													 {
+														 validator: checkName,
+														 trigger  : "valid"
+													 }
+												 ],
+												 password: [
+													 {
+														 validator: valid,
+														 trigger  : "valid"
+													 }
+												 ]
+											 });
+
+function checkName(rule: any, value: any, callback: (args?: any) => void): void {
+	if (Assert.isNumber(value)) {
+		callback(new Error(`${rule.field} is not set Number`));
+	} else if (!Assert.hasText(value)) {
+		callback(new Error(`${rule.field} is null`));
+	} else {
+		callback();
+	}
+}
+
+const user: Record<string, any> = reactive({
+											   username: "",
+											   password: ""
+										   });
 const promise: (...args: unknown[]) => Promise<any> = oncePromise(instance.post);
 
 function registry(): void {
 	ruleFormRef.value?.validate(async (isValid: boolean) => {
 		IfStream.of(isValid && !Assert.isNumber(user.username))
 				.then(async () =>
-					({
-						state   : true,
-						__SELF__: FLAG,
-						value   : await promise(HttpURL.REGISTRY, {
-							name    : user.username,
-							password: user.password
-						})
-					})
+						  ({
+							  state   : true,
+							  __SELF__: FLAG,
+							  value   : await promise(HttpURL.REGISTRY, {
+								  name    : user.username,
+								  password: user.password
+							  })
+						  })
 				)
 				.catch(() => {
-					warning("信息有误！");
+					warning("用户名或密码为空");
 					return IfStream.STOP;
 				})
 				.next()
-				.then(() => {
+				.then((value: AxiosResponse<ResponseApi<string>>) => {
 					success("注册成功");
+					const counter = useUserInfoStore();
+					counter.login(value.data.data, user.username, "reader");
+					router
+						.push({
+								  name: "main"
+							  });
 					ruleFormRef.value!.clearValidate();
 					ruleFormRef.value!.resetFields();
 				})
 				.catch((e) => {
-					error(e.data.error);
+					warning("用户名已存在！");
 					ruleFormRef.value!.resetFields();
 				});
 	});

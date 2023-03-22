@@ -1,57 +1,61 @@
-.btn {
-    background-color: transparent;
-    position: relative;
-    border: none;
+.del-button {
+    width: 50px;
+    height: 50px;
+    -webkit-transform: scale(1);
+    -ms-transform: scale(1);
+    transform: scale(1);
+    border-style: none;
+    outline: none;
+    cursor: pointer;
+    border-radius: 50%;
+    background: rgb(228, 232, 236);
+    background: linear-gradient(45deg, rgb(228, 232, 236) 0%, rgb(234 234 234) 100%);
+    -webkit-box-shadow: -2px -7px 10px #f1f1f1, 4px 6px 10px #d4d7da;
+    box-shadow: -2px -7px 10px #f1f1f1, 4px 6px 10px #d4d7da;
+    -webkit-transition: all .3s;
+    transition: all .3s;
 }
 
-.btn::after {
-    content: 'delete';
-    position: absolute;
-    top: -130%;
-    left: 50%;
-    -webkit-transform: translateX(-50%);
-    -ms-transform: translateX(-50%);
-    transform: translateX(-50%);
-    width: -webkit-fit-content;
-    width: -moz-fit-content;
-    width: fit-content;
-    height: -webkit-fit-content;
-    height: -moz-fit-content;
-    height: fit-content;
-    background-color: rgb(168, 7, 7);
-    padding: 4px 8px;
-    border-radius: 5px;
-    -webkit-transition: .2s linear;
-    transition: .2s linear;
-    -webkit-transition-delay: .2s;
-    transition-delay: .2s;
-    color: white;
-    text-transform: uppercase;
-    font-size: 12px;
-    opacity: 0;
-    visibility: hidden;
+.del-button :active {
+    background: rgb(218, 221, 224);
+    background: linear-gradient(45deg, rgb(218, 221, 224) 0%, rgb(241, 241, 241) 100%);
+    -webkit-box-shadow: -2px -7px 10px #d4d7da,
+    4px 6px 10px #f1f1f1,
+    inset -2px -7px 10px #f1f1f1,
+    inset 4px 6px 10px #d4d7da;
+    box-shadow: -2px -7px 10px #d4d7da,
+    4px 6px 10px #f1f1f1,
+    inset -2px -7px 10px #f1f1f1,
+    inset 4px 6px 10px #d4d7da;
+    -webkit-transition: all .3s;
+    transition: all .3s;
+    -webkit-transform:  scale(.95);
+    -ms-transform:  scale(.95);
+    transform:  scale(.95);
 }
 
-.icon {
-    -webkit-transform: scale(1.2);
-    -ms-transform: scale(1.2);
-    transform: scale(1.2);
-    -webkit-transition: .2s linear;
-    transition: .2s linear;
+.del-button  i {
+    font-size: 20px;
+    background: linear-gradient(-45deg, gray 0%, lightgray 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    -webkit-transition: all .3s;
+    transition: all .3s;
 }
 
-.btn:hover > .icon {
-    -webkit-transform: scale(1.5);
-    -ms-transform: scale(1.5);
-    transform: scale(1.5);
+.del-button :active i {
+    -webkit-transform: scale(.9);
+    -ms-transform: scale(.9);
+    transform: scale(.9);
+    -webkit-transition: all .3s;
+    transition: all .3s;
 }
 
-.btn:hover > .icon path {
-    fill: rgb(168, 7, 7);
-}
-
-.btn:hover::after {
-    visibility: visible;
-    opacity: 1;
-    top: -160%;
+.svg {
+    width: 25px;
+    height: 60px;
+    border-style: none;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
 }

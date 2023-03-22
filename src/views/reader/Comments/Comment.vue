@@ -1,16 +1,10 @@
 <template>
-    <div class="body-parnet">
-        <!--        <el-avatar-->
-        <!--                :size="60"-->
-        <!--                :src="data.user.headerImage">-->
-        <!--            <img-->
-        <!--                    :alt="data.user.username"-->
-        <!--                    src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png"/>-->
-        <!--        </el-avatar>-->
+    <div class="body-parent">
         <div class="reader-body">
             <div class="reader-header">
-                <div style="display: flex; align-items: center">
-                    <h3>{{ checkName(data.user.username) }}</h3>
+                <div style="display: flex; align-items: center;  color: #999;
+    font-size: 14px;">
+                    <h3>用户：{{ checkName(data.user.username) }}</h3>
                     <div
                             v-if="data.parent && data.parent.id !== data.root"
                             style="display: flex; align-items: center">
@@ -19,48 +13,39 @@
                     </div>
                 </div>
                 <div class="operator">
-                    <el-space>
+                    <el-space alignment="normal" size="large">
                         <el-badge :value="likeCount">
                             <label class="container">
-                                <input v-model="isLike" :disabled="!userInfoStore.state" type="checkbox" @change="like">
-                                <div class="checkmark">
-                                    <svg fill="none" viewBox="0 0 24 24">
-                                        <path d="M8 10V20M8 10L4 9.99998V20L8 20M8 10L13.1956 3.93847C13.6886 3.3633 14.4642 3.11604 15.1992 3.29977L15.2467 3.31166C16.5885 3.64711 17.1929 5.21057 16.4258 6.36135L14 9.99998H18.5604C19.8225 9.99998 20.7691 11.1546 20.5216 12.3922L19.3216 18.3922C19.1346 19.3271 18.3138 20 17.3604 20L8 20"
-                                              stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round"
-                                              stroke-width="1.3"></path>
-                                    </svg>
-                                </div>
+                                <input v-model="isLike" type="checkbox"
+                                       @change="like">
+                                <svg id="Glyph" version="1.1" viewBox="0 0 32 32" xml:space="preserve"
+                                     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path id="XMLID_254_" d="M29.845,17.099l-2.489,8.725C26.989,27.105,25.804,28,24.473,28H11c-0.553,0-1-0.448-1-1V13  c0-0.215,0.069-0.425,0.198-0.597l5.392-7.24C16.188,4.414,17.05,4,17.974,4C19.643,4,21,5.357,21,7.026V12h5.002  c1.265,0,2.427,0.579,3.188,1.589C29.954,14.601,30.192,15.88,29.845,17.099z"></path>
+                                    <path id="XMLID_256_"
+                                          d="M7,12H3c-0.553,0-1,0.448-1,1v14c0,0.552,0.447,1,1,1h4c0.553,0,1-0.448,1-1V13C8,12.448,7.553,12,7,12z   M5,25.5c-0.828,0-1.5-0.672-1.5-1.5c0-0.828,0.672-1.5,1.5-1.5c0.828,0,1.5,0.672,1.5,1.5C6.5,24.828,5.828,25.5,5,25.5z"></path></svg>
                             </label>
                         </el-badge>
-                    </el-space>
-                    <el-space>
                         <el-badge :value="unLikeCount">
-                            <label class="container" style="transform: rotate(180deg) translateY(40%);">
-                                <input v-model="isNotLike" :disabled="!userInfoStore.state" type="checkbox"
+                            <label class="container un_like" style="transform: rotate(180deg) scale(.8);">
+                                <input v-model="isNotLike" type="checkbox"
                                        @change="unLike">
-                                <div class="checkmark">
-                                    <svg fill="none" viewBox="0 0 24 24">
-                                        <path d="M8 10V20M8 10L4 9.99998V20L8 20M8 10L13.1956 3.93847C13.6886 3.3633 14.4642 3.11604 15.1992 3.29977L15.2467 3.31166C16.5885 3.64711 17.1929 5.21057 16.4258 6.36135L14 9.99998H18.5604C19.8225 9.99998 20.7691 11.1546 20.5216 12.3922L19.3216 18.3922C19.1346 19.3271 18.3138 20 17.3604 20L8 20"
-                                              stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round"
-                                              stroke-width="1.3"></path>
-                                    </svg>
-                                </div>
+                                <svg id="Glyph" version="1.1" viewBox="0 0 32 32" xml:space="preserve"
+                                     xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path id="XMLID_254_" d="M29.845,17.099l-2.489,8.725C26.989,27.105,25.804,28,24.473,28H11c-0.553,0-1-0.448-1-1V13  c0-0.215,0.069-0.425,0.198-0.597l5.392-7.24C16.188,4.414,17.05,4,17.974,4C19.643,4,21,5.357,21,7.026V12h5.002  c1.265,0,2.427,0.579,3.188,1.589C29.954,14.601,30.192,15.88,29.845,17.099z"></path>
+                                    <path id="XMLID_256_"
+                                          d="M7,12H3c-0.553,0-1,0.448-1,1v14c0,0.552,0.447,1,1,1h4c0.553,0,1-0.448,1-1V13C8,12.448,7.553,12,7,12z   M5,25.5c-0.828,0-1.5-0.672-1.5-1.5c0-0.828,0.672-1.5,1.5-1.5c0.828,0,1.5,0.672,1.5,1.5C6.5,24.828,5.828,25.5,5,25.5z"></path></svg>
                             </label>
                         </el-badge>
+                        <button v-if="userInfoStore.user.id.localeCompare(data.user.id) === 0" class="btn"
+                                @click="deleteComment">
+
+                            <button class="btn del-button ">
+                                <i class="iconfont icon-shanchu1"></i>
+                            </button>
+                        </button>
                     </el-space>
 
-                    <button v-if="userInfoStore.user.id.localeCompare(data.user.id) === 0" class="btn"
-                            @click="deleteComment">
-                        <svg class="icon" height="17.5" viewBox="0 0 15 17.5" width="15"
-                             xmlns="http://www.w3.org/2000/svg">
-                            <path id="Fill"
-                                  d="M15,18.75H5A1.251,1.251,0,0,1,3.75,17.5V5H2.5V3.75h15V5H16.25V17.5A1.251,1.251,0,0,1,15,18.75ZM5,5V17.5H15V5Zm7.5,10H11.25V7.5H12.5V15ZM8.75,15H7.5V7.5H8.75V15ZM12.5,2.5h-5V1.25h5V2.5Z"
-                                  transform="translate(-2.5 -1.25)"></path>
-                        </svg>
-                    </button>
                 </div>
             </div>
-            <span class="time">
+            <span class="time">评论时间：
 				{{
 								formatTime(data.timestamp)
                 }}
@@ -69,7 +54,8 @@
                     alignment="normal"
                     direction="vertical">
 				<pre
-                style="cursor: pointer"
+
+                style="cursor: pointer;font-size: 18px"
                 @click="commentShow = !commentShow"
                 v-html="data.content"></pre>
                 <!--        回复评论-->
@@ -77,25 +63,22 @@
                     <div
                             v-if="commentShow"
                             class="replyToComments transition-box">
-                        <el-row
-                                :gutter="10"
+                        <el-space
                                 style="width: 100%">
-                            <el-col :span="20">
-                                <el-input
-                                        v-model="comments"
-                                        :placeholder="'回复 ' + data.user.username + ': '"/>
-                            </el-col>
-                            <el-col :span="4">
-                                <el-button
-                                        type="primary"
-                                        @click="commit">
-                                    <template #icon>
-                                        <i class="icon-pinglunxiao iconfont"/>
-                                    </template>
-                                    评论
-                                </el-button>
-                            </el-col>
-                        </el-row>
+                            <el-input v-model="comments"
+                                      :placeholder="'回复 ' + data.user.username + ': '"
+                                      class="replyToComments transition-box"
+                                      type="textarea"/>
+                            <el-button
+                                    size="large"
+                                    type="primary"
+                                    @click="commit">
+                                <template #icon>
+                                    <i class="icon-pinglunxiao iconfont"/>
+                                </template>
+                                评论
+                            </el-button>
+                        </el-space>
                     </div>
                 </el-collapse-transition>
             </el-space>
@@ -128,6 +111,7 @@ import instance                    from "@/axios";
 import type ResponseApi            from "@/axios/ResponseApi";
 import { default as MyCollapse }   from "@/components/collapse/index.vue";
 import CommentType, { returnType } from "@/types/CommentType";
+import { commit as c }             from "@/utils/Gloab";
 import oncePromise                 from "@/utils/OncePromise";
 import type { AxiosResponse }      from "axios";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -165,12 +149,13 @@ const getPromise = oncePromise(instance.get);
 
 function like() {
 	if (!userInfoStore.state) {
-		messageLinkTo("尚未登陆", "/login");
+		isLike.value = false;
+		messageLinkTo("尚未登陆,点击跳转", "/login");
 		return;
 	}
 	const commentId = props.data.id;
 	//发送请求
-	const url = isLike.value
+	const url = !isLike.value
 		? HttpURL.COMMENT_CANCEL : HttpURL.COMMENT_LIKE;
 	patch(url, commentId, {
 		headers: {
@@ -190,7 +175,6 @@ function like() {
 }
 
 function formatTime(time: Date): string {
-	console.log(time);
 	const now = new Date();
 	const diff: number = (now.getTime() - time.getTime()) / 1000; // 计算时间差，单位为秒
 	if (diff < 60) {
@@ -206,13 +190,14 @@ function formatTime(time: Date): string {
 
 function unLike() {
 	if (!userInfoStore.state) {
-		messageLinkTo("尚未登陆", "/login");
+		isNotLike.value = false;
+		messageLinkTo("尚未登陆,点击跳转", "/login");
 		return;
 	}
 	const commentId = props.data.id;
 	const id = userInfoStore.user.id;
 	//发送请求
-	const url = isNotLike.value
+	const url = !isNotLike.value
 		? HttpURL.COMMENT_CANCEL
 		: HttpURL.COMMENT_UNLIKE;
 	patch(url, commentId, {
@@ -265,46 +250,15 @@ function deleteComment() {
 const comments = ref<string>("");
 const commentShow = ref<boolean>(false);
 const store = useUserInfoStore();
+const commit = () => {
+	c(comments.value, props.data.book.bookId, (book) => {
+		emits("updateView", book);
+	}, props.data, props.data.root ?? props.data.id);
+	comments.value = "";
+	commentShow.value = false;
+	
+};
 
-function commit() {
-	if (!userInfoStore.state) {
-		messageLinkTo("尚未登陆", "/login");
-		return;
-	}
-	//评论为空
-	if (comments.value.length === 0) return;
-	commitComment(store.user.id, props.data.book.bookId, comments.value, props.data.id)
-		.then(({data: {data}}: AxiosResponse<ResponseApi<string>>) => {
-			emits("updateView", {
-				parent     : props.data,
-				root       : props.data.root ?? props.data.id,
-				user       : {
-					username   : store.user.name,
-					id         : store.user.id,
-					headerImage: ""
-				},
-				id         : data,
-				children   : undefined,
-				content    : comments.value,
-				unLikeCount: 0,
-				likeCount  : 0,
-				timestamp  : new Date(),
-				book       : {
-					bookId: props.data.book.bookId
-				},
-				isLike     : false,
-				isNotLike  : false,
-				child      : 0
-			});
-		})
-		.catch(({data: {error}}) => {
-			ElMessage.warning(error);
-		})
-		.finally(() => {
-			comments.value = "";
-			commentShow.value = false;
-		});
-}
 
 /**
  * 用于加载当前评论的子评论的函数。
@@ -330,7 +284,7 @@ async function handle(): Promise<void> {
 		const cache: Record<string, CommentType> = {};
 		const children = data.map((e: returnType) => {
 			const comment: CommentType = map(e);
-			record.set(comment, e.parent_id);
+			record.set(comment, e.parentId);
 			cache[comment.id] = comment;
 			return comment;
 		});
@@ -338,6 +292,7 @@ async function handle(): Promise<void> {
 			const parentId: string | undefined = record.get(c);
 			c.parent = parentId ? cache[parentId] : undefined;
 		});
+		children.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 		commentStore.updateComment(props.data.book.bookId, children, props.data.id);
 		collapseRef.value?.closeLoading();
 	} catch (e: any) {
@@ -351,8 +306,10 @@ async function handle(): Promise<void> {
 @import url("@/views/reader/Comments/btn_del.css");
 @import url("@/views/css/check_like.css");
 
-.body-parnet {
-    border: 1px solid #ccc;
+.body-parent {
+    background-color: #f3f3f3;
+    color: #333;
+    border: 1px dashed #ccc;
     padding: 10px;
     display: -webkit-flex;
     display: flex;
@@ -394,7 +351,7 @@ async function handle(): Promise<void> {
 }
 
 h3 {
-   
+
     cursor: default;
     user-select: none;
 }
@@ -406,15 +363,15 @@ h3 {
 .replyToComments {
     display: flex;
     display: -webkit-flex;
-    justify-content: space-between;
 }
 
 .time {
     color: #767575;
     user-select: none;
-    font-size: 12px;
+    font-size: 8px;
     height: 30px;
     align-items: center;
     display: flex;
 }
+
 </style>

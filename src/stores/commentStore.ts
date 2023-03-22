@@ -30,7 +30,7 @@ export const useCommentStore = defineStore("comment", () => {
 					return instance
 						.post(`${HttpURL.getComments}${bookId}${userId ? "/" + userId : ""}`, {
 							offset,
-							pageSize,
+							pageSize:Math.max(pageSize,size),
 							size,
 							id: last?.id
 						})
@@ -41,6 +41,7 @@ export const useCommentStore = defineStore("comment", () => {
 								ResponseApi<PageData<CommentType>>
 							>): PageData<CommentType> => {
 								data.value = data.value.map((v: unknown) => map(<returnType>v));
+								
 								return data;
 							})
 						.catch(reason => {
@@ -68,7 +69,7 @@ export const useCommentStore = defineStore("comment", () => {
 		return (_[bookId] = getPage(bookId, userId));
 	}
 	
-	function updateComment(bookId: string, comments: CommentType[], rootId: string): void;
+	function updateComment(bookId: string, comments: CommentType[]| CommentType, rootId: string): void;
 	function updateComment(bookId: string, comment: CommentType): void;
 	/**
 	 * `updataComment` 是一个带有两个参数的函数，`bookId` 和 `comment`，并返回 `void`
@@ -83,7 +84,6 @@ export const useCommentStore = defineStore("comment", () => {
 		rootId?: string
 	): void {
 		if (!bookId || bookId.length === 0) return;
-		debugger
 		const target: Page<CommentType> = _[bookId];
 		if (Assert.isNull(target)) {
 			console.warn(`未存在${bookId}书籍评论`);

@@ -5,28 +5,30 @@
         <div
                 class=" _____boxed "
         >
-            <div
-                    v-for="item in BooksData.view"
-                    :key="item.index"
-            >
+            <TransitionGroup name="list" tag="ul">
+                <template
+                        v-for="item in BooksData.view"
+                        :key="item.index"
+                >
 
-                <book-view
-                        :cancel="() => shoppingCart.removeAProduct(item.value)"
-                        :check-has-borrowed="
+                    <book-view
+                            :cancel="() => shoppingCart.removeAProduct(item.value)"
+                            :check-has-borrowed="
 					() => readerStore.borrowALibraryCard.borrowedBook.indexOf(item.value.id) > -1
 				"
-                        :check-has-checked="() => !!shoppingCart._[item.value.id]"
-                        :prop="item.value"
-                        :style="position(item.index)"
-                        class="child"
-                        @addAShoppingCart="() => shoppingCart.addToCart(item.value)"
-                        @click.prevent="
+                            :check-has-checked="() => !!shoppingCart._[item.value.id]"
+                            :prop="item.value"
+                            :style="position(item.index)"
+                            class="child"
+                            @addAShoppingCart="() => shoppingCart.addToCart(item.value)"
+                            @click.prevent="
 					(e:Event) => {
             e.preventDefault();
 						linkTo(item.value);
 					}
 				"/>
-            </div>
+                </template>
+            </TransitionGroup>
         </div>
         <el-backtop
                 :bottom="180"
@@ -69,7 +71,7 @@ const height: number = 300;
 const clientHeight: Ref<number> = ref(document.body.clientHeight);
 const column: Ref<number> = ref<number>(1);
 const gap: Ref<number> = ref<number>(10);
-
+const gap_x = 10;//按照当前的计算保证间距不会很小
 const gap_y = 10;//设置上下间距
 const clientTop: Ref<number> = ref<number>(0);//客户端的距离顶部的高度
 const clientScrollHeight: Ref<string> = ref("0px");
@@ -106,7 +108,7 @@ function linkTo(book: Book): void {
 }
 
 /**
- * @fixme 03-18 宽度变化和总高度不一致导致可视区域五渲染元素
+ * @fixme 03-18 宽度变化和总高度不一致导致可视区域无渲染元素
  * @param {number} index
  * @return {{[p: string]: string}}
  */
@@ -121,9 +123,13 @@ function position(index: number): { [key: string]: string } {
 	};
 }
 
-const throttle_mounted = throttle(mounted, 300);
+const throttle_mounted = throttle(mounted, 350);
+const throttle_resize = throttle(() => {
+	column.value = Math.floor((el.value!.clientWidth + gap_x) / (gap_x + width));
+	mounted();
+}, 300, 0);
 const resizeObserver: ResizeObserver = new ResizeObserver(entries => {
-	throttle_mounted();
+	throttle_resize();
 });
 
 
@@ -133,7 +139,6 @@ defineExpose<{ refresh: () => void; search: (virtual: Book[]) => void }>({
 																			 refresh() {
 																				 const [start, end] = getRange();
 																				 BooksData.virtualTo(null, start, end);
-																				 updateToView();
 																			 },
 																			 search(virtual: Book[]) {
 																				 BooksData.virtualTo(
@@ -148,7 +153,6 @@ defineExpose<{ refresh: () => void; search: (virtual: Book[]) => void }>({
 																										 })),
 																						 BooksData.pageInfo),
 																					 0, virtual.length);
-																				 updateToView();
 																			 }
 																			 
 																		 });
@@ -161,39 +165,19 @@ defineExpose<{ refresh: () => void; search: (virtual: Book[]) => void }>({
 function mounted(): Promise<void> | void {
 	if (Assert.isNull(el.value)) return;
 	clientTop.value = el.value!.scrollTop;
-	clientHeight.value = el.value!.offsetHeight;
-	column.value = Math.floor((el.value!.clientWidth + gap.value) / (gap.value + width));
+	clientHeight.value = el.value!.offsetHeight === 0 ? document.body.clientHeight : el.value!.offsetHeight;
 	updateToView();
 }
 
-onActivated(throttle_mounted);
+onActivated(() => {
+	throttle_resize();
+});
 
-onMounted(throttle_mounted);
+onMounted(throttle_resize);
 onMounted(() => {
 	resizeObserver.observe(el.value as HTMLElement);
 });
 
-function isElementInViewport(el: HTMLElement) {
-	const rect = el.getBoundingClientRect();
-	
-	return (
-		rect.top >= 0 &&
-		rect.left >= 0 &&
-		rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-		rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-	);
-}
-
-function isChildElementInViewport(parentEl: HTMLElement, childEl: HTMLElement) {
-	const parentRect = parentEl.getBoundingClientRect();
-	const childRect = childEl.getBoundingClientRect();
-	return (
-		childRect.top >= parentRect.top &&
-		childRect.left >= parentRect.left &&
-		childRect.bottom <= parentRect.bottom &&
-		childRect.right <= parentRect.right
-	);
-}
 
 //收集元素变化计算页面长度变化
 watchEffect(() => {
@@ -205,9 +189,9 @@ watchEffect(() => {
 function getRange(): number[] {
 	const col = column.value;
 	const topRow = Math.floor((clientTop.value + gap_y) / (gap_y + height));//在顶部的行数
-	const start: number = Math.max(0, topRow - 1) * col;
+	const start: number = Math.max(0, topRow) * col;
 	const end: number = (Math.ceil(
-		(clientTop.value + gap_y + clientHeight.value) / (gap_y + height)) + 1) * col;//计算当前区域底部行
+		(clientTop.value + gap_y + clientHeight.value) / (gap_y + height))) * col;//计算当前区域底部行
 	return [start, BooksData.pageInfo.totalSize !== -1 ? Math.min(end, BooksData.pageInfo.totalSize) : end];
 	
 }
@@ -239,12 +223,13 @@ function updateToView(): void {
     position: absolute;
     top: 0;
     left: 0;
+    transition: all 0.3s;
 }
 
 .list-move, /* 对移动中的元素应用的过渡 */
 .list-enter-active,
 .list-leave-active {
-    transition: all 0.5s linear;
+    transition: all 0.5s ease;
 }
 
 .list-enter-from,
@@ -255,6 +240,8 @@ function updateToView(): void {
 /* 确保将离开的元素从布局流中删除
   以便能够正确地计算移动的动画。 */
 .list-leave-active {
+    position: absolute;
 }
+
 
 </style>

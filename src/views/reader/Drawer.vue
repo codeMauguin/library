@@ -71,12 +71,12 @@
                     <el-button @click="closed">cancel</el-button>
                     <el-button
                             type="warning"
-                            @click="shoppingCart.emptyTheCart">
+                            @click.stop="shoppingCart.emptyTheCart">
                         清空购物车
                     </el-button>
                     <el-button
                             type="primary"
-                            @click="commit"
+                            @click.stop="commit"
                     >借阅
                     </el-button>
                 </el-button-group>
@@ -87,6 +87,9 @@
 
 <script lang="ts" setup>
 import type ResponseApi                   from "@/axios/ResponseApi";
+import {
+    useUserInfoStore
+}                                         from "@/stores/counter";
 import {
     useReaderStore
 }                                         from "@/stores/readerStore";
@@ -102,8 +105,12 @@ import {
 }                                         from "@/views/order/order";
 import type { AxiosResponse }             from "axios";
 import {
+    ElNotification
+}                                         from "element-plus";
+import {
     ElButton, ElButtonGroup, ElDrawer, ElMessage, ElStep, ElSteps, ElTable, ElTableColumn, ElTag
 }                                         from "element-plus";
+import type { Ref }                       from "vue";
 import { nextTick, reactive, ref, watch } from "vue";
 
 const multipleTableRef = ref<InstanceType<typeof ElTable>>();
@@ -112,9 +119,10 @@ const total = computed(() => changeBooks.length);
 const changeBooks = reactive<Book[]>([]);
 const datas = computed(() => Object.values(defaults.books));
 const shoppingCart = useShopStore();
+const userStore = useUserInfoStore();
 
 const active = ref<number>(0);
-const status = ref<string[]>(["wait", "wait", "wait"]);
+const status: Ref<string[]> = ref(["wait", "wait", "wait"]);
 
 const stepShow = ref<boolean>(false);
 const signal: SignalDriver = new SignalDriver();
@@ -126,9 +134,9 @@ signal.on(2, (data: boolean): void => {
 	if (data) {
 		status.value[2] = "success";
 		ElMessage.success({
-			grouping: true,
-			message : "借阅成功"
-		});
+							  grouping: true,
+							  message : "借阅成功"
+						  });
 		const reader = useReaderStore();
 		reader.borrowALibraryCard.borrowedBook.push(...changeBooks.map(map));
 		shoppingCart.removeAProduct(changeBooks);
@@ -140,16 +148,16 @@ signal.on(3, (e: AxiosResponse<ResponseApi<any>>): void => {
 	status.value[2] = "error";
 	active.value = 2;
 	ElMessage.warning({
-		grouping: true,
-		message : e?.data?.error ?? "借阅失败"
-	});
+						  grouping: true,
+						  message : e?.data?.error ?? "借阅失败"
+					  });
 });
 signal.on(4, () => {
 	setTimeout(() => {
 		stepShow.value = false;
 	}, 3000);
 });
-
+    
 const defaults = withDefaults(
 	defineProps<{
 		show: boolean;
@@ -174,6 +182,13 @@ function map(target: Book): string {
 }
 
 function commit(): void {
+	if (!userStore.state) {
+		ElNotification.error({
+								 title  : "借阅图书",
+								 message: "用户尚未登录"
+							 });
+		return;
+	}
 	stepShow.value = true;
 	Promise.resolve(commitOrder(changeBooks.map(map), signal)).finally(() => {
 		signal.emit(4);

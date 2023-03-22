@@ -34,7 +34,7 @@ export interface PageInstance<T> {
 	 * 初始化系统参数
 	 * 使用创建后刷新
 	 * @param options 选项
-	 * @deprecated
+	 * @deprecated 废除了
 	 */
 	init(options: PageOption): void;
 	
@@ -51,7 +51,7 @@ export interface PageInstance<T> {
 	/**
 	 * 它刷新当前页面。
 	 */
-	refresh(...args: any[] | undefined[]): Promise<void>;
+	refresh(): Promise<void>;
 	
 	virtual(virtualPage?: VirtualPage<T>): void;
 }

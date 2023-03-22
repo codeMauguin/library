@@ -1,6 +1,6 @@
 /** @format */
 
-import { ElLink, ElMessage } from "element-plus";
+import { ElLink, ElMessage }          from "element-plus";
 import type { MessageParamsWithType } from "element-plus";
 
 export function success(options: MessageParamsWithType | string) {
@@ -45,7 +45,7 @@ export function messageLinkTo(message: string, uri: string): void {
 			h(
 				ElLink,
 				{
-					type: "warning",
+					type: "info",
 					href: uri
 				},
 				() => message

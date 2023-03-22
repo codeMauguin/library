@@ -63,13 +63,9 @@ export default class LongPage<T> implements PageInstance<Item<T>> {
 				this.pageUpdate((page: PageOption) => ((page.totalSize = response.size), page));
 			}
 			const update: Item<T>[] = (response.value.map((value, index) => ({
-				value: value, index: index + start
+				value: value, index: 0
 			})) as Item<T>[]);
 			this.data.splice(start, end - start, ...update);
-			this.data.forEach((views: Item<T>, index): void => {
-				if (Assert.notNull(views))
-					views.index = index;
-			});
 			this.updateIndex(<Item<T>[]>update, start);
 			merge(this.view, update);
 		}).finally(closeLoading);
@@ -94,13 +90,11 @@ export default class LongPage<T> implements PageInstance<Item<T>> {
 		merge(this.realPage, this.pageInfo);
 	}
 	
-	public async refresh(start: number, end: number): Promise<void> {
-		if (Assert.notNull(this.page)) {
-			await this.page!.refresh();
-			merge(this.view, this.page!.view);
-			return;
-		}
-		return await this.updateToView(start, end);
+	/**
+	 * @deprecated
+	 * @return {Promise<void>}
+	 */
+	public async refresh(): Promise<void> {
 	}
 	
 	/**
@@ -134,6 +128,11 @@ export default class LongPage<T> implements PageInstance<Item<T>> {
 		}
 	}
 	
+	/**
+	 * 它更新目标数组中每个项目的索引属性，从指定的索引开始
+	 * @param {Item<T>[]} target - 要更新其索引的数组。
+	 * @param {number} start - 目标数组中第一项的索引。
+	 */
 	private updateIndex(target: Item<T>[], start: number): void {
 		for (let i = 0; i < target.length; ++i) {
 			target[i].index = i + start;

@@ -100,6 +100,7 @@ export function throttle<R = any | null>(fn: (...args: any[]) => any, delay: num
 										 max: number                                = 10): (...args: unknown[]) => R {
 	let timer: unknown | null = null;
 	let count = 0;
+	max = Math.max(max, 1);//防止max被设置负数导致死循环
 	
 	function clear(this: any, ...args: any[]): void {
 		

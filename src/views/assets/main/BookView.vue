@@ -15,8 +15,11 @@
                             <template #template>
                                 <el-skeleton-item style="width: 200px;height: 300px" variant="image"/>
                             </template>
+                            <template #default>
+                                <img :src="image" alt="" style="width: 200px;height: 300px" @load="load"/>
+                            </template>
                         </el-skeleton>
-                        <img :src="image" alt="" style="width: 200px;height: 300px" @load="load"/>
+
                     </div>
                     <div class="book_info">
                         <h1 class="book_name">《{{ data?.name }}》</h1>
@@ -123,19 +126,18 @@
     </div>
 </template>
 <script lang="ts" setup>
-import type ResponseApi                                         from "@/axios/ResponseApi";
-import type { Page }                                            from "@/components/Pages/Page2";
-import { useReaderStore }                                       from "@/stores/readerStore";
-import { useShopStore }                                         from "@/stores/ShopStore";
-import type Book                                                from "@/types/Book";
-import type CommentType                                         from "@/types/CommentType";
-import { closed, onsubmit, openShop }                           from "@/utils/Gloab";
-import LRUCache                                                 from "@/utils/LRUCache";
-import { default as MyComment }                                 from "@/views/reader/Comments/Comment.vue";
-import Drawer                                                   from "@/views/reader/Drawer.vue";
-import type { AxiosResponse }                                   from "axios";
-import { ElDivider, ElEmpty, ElMessage, ElMessageBox, ElSpace } from "element-plus";
-import type { Ref, UnwrapNestedRefs }                           from "vue";
+import type { Page }                                 from "@/components/Pages/Page2";
+import { useReaderStore }                            from "@/stores/readerStore";
+import { useShopStore }                              from "@/stores/ShopStore";
+import type Book                                     from "@/types/Book";
+import type CommentType                              from "@/types/CommentType";
+import { closed, onsubmit, openShop }                from "@/utils/Gloab";
+import { commit as c }                               from "@/utils/Gloab";
+import LRUCache                                      from "@/utils/LRUCache";
+import { default as MyComment }                      from "@/views/reader/Comments/Comment.vue";
+import Drawer                                        from "@/views/reader/Drawer.vue";
+import { ElDivider, ElEmpty, ElMessageBox, ElSpace } from "element-plus";
+import type { Ref, UnwrapNestedRefs }                from "vue";
 
 const image: Ref<string | ArrayBuffer | null> = ref("");
 const loading: Ref<boolean> = ref(true);
@@ -181,7 +183,10 @@ async function loader(id: string): Promise<void> {
 		merge(data, book);
 	}
 	pageInstance.value = store.getBookComment(id, userStore.user.id);
-	pageInstance.value?.refresh();
+	pageInstance.value?.refresh().then(() => {
+		pageInstance.value?.view.sort((b, a) => a.timestamp.getTime() - b.timestamp.getTime());
+		pageInstance.value!.pageUpdate((page) => (page.pageSize = pageInstance.value?.pageInfo.totalSize, page));
+	});
 	const cache: string | undefined = LRUCache.get(data.image as string);
 	if (cache === undefined) {
 		fetch(data.image as string).then(value => value.blob()).then(value => {
@@ -190,9 +195,11 @@ async function loader(id: string): Promise<void> {
 			reader.onloadend = function () {
 				image.value = reader.result;
 				LRUCache.put(data.image as string, image.value as string);
+				loading.value = false;
 			};
 		});
 	} else {
+		loading.value = false;
 		image.value = cache;
 	}
 }
@@ -226,47 +233,11 @@ onActivated(() => {
 });
 const pageInstance: Ref<Page<CommentType> | null> = shallowRef(null);
 const commentContent = ref<string>("");
+const commit = () => {
+	c(commentContent.value, route.params.id as string, updateView);
+	commentContent.value = "";
+};
 
-function commit() {
-	if (commentContent.value.length === 0) return;
-	const store = useUserInfoStore();
-	if (!store.state) {
-		ElMessageBox.alert("登录后在评论");
-		return;
-	}
-	commitComment(store.user.id, route.params.id as string, commentContent.value).then(
-		({data: {code, data}}: AxiosResponse<ResponseApi<string>>) => {
-			ElMessage({
-						  grouping: true,
-						  type    : code === 1000 ? "success" : "error",
-						  message : "评论成功"
-					  });
-			// 加入评论界面
-			updateView({
-						   parent     : undefined,
-						   child      : 0,
-						   root       : undefined,
-						   user       : {
-							   username   : store.user.name,
-							   id         : store.user.id,
-							   headerImage: ""
-						   },
-						   id         : data,
-						   children   : undefined,
-						   content    : commentContent.value,
-						   unLikeCount: 0,
-						   likeCount  : 0,
-						   timestamp  : new Date(),
-						   book       : {
-							   bookId: route.params.id as string
-						   },
-						   isLike     : false,
-						   isNotLike  : false
-					   });
-			commentContent.value = "";
-		}
-	);
-}
 </script>
 
 <style scoped>

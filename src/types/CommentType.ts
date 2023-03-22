@@ -2,8 +2,8 @@
 
 type returnType = {
 	id: string;
-	root_id?: string;
-	parent_id?: string;
+	rootId?: string;
+	parentId?: string;
 	bookId: string;
 	user: {
 		id: string; name: string; image: string;
@@ -33,7 +33,7 @@ type CommentType = {
 
 function map(element: returnType): CommentType {
 	return {
-		root       : element.root_id,
+		root       : element.rootId,
 		parent     : undefined,
 		book       : {bookId: element.bookId},
 		timestamp  : new Date(element.timestamp),

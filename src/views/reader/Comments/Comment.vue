@@ -34,12 +34,9 @@
                                           d="M7,12H3c-0.553,0-1,0.448-1,1v14c0,0.552,0.447,1,1,1h4c0.553,0,1-0.448,1-1V13C8,12.448,7.553,12,7,12z   M5,25.5c-0.828,0-1.5-0.672-1.5-1.5c0-0.828,0.672-1.5,1.5-1.5c0.828,0,1.5,0.672,1.5,1.5C6.5,24.828,5.828,25.5,5,25.5z"></path></svg>
                             </label>
                         </el-badge>
-                        <button v-if="userInfoStore.user.id.localeCompare(data.user.id) === 0" class="btn"
-                                @click="deleteComment">
-
-                            <button class="btn del-button ">
-                                <i class="iconfont icon-shanchu1"></i>
-                            </button>
+                        <button v-if="userInfoStore.user.id.localeCompare(data.user.id) === 0"
+                                class="del-button " @click="deleteComments">
+                            <i class="iconfont icon-shanchu1"></i>
                         </button>
                     </el-space>
 
@@ -89,14 +86,15 @@
                     :total="Math.max(data.children?.length ?? 0, data.child)"
                     @change="handle">
                 <template #body>
-                    <template
-                            v-for="(item, index) in data.children"
-                            :key="item.id">
-                        <comment
-                                :data="item"
-                                @updateView="d => emits('updateView', d)"
-                                @delete-comment="id => emits('deleteComment', id)"/>
-                    </template>
+                    <TransitionGroup name="list">
+                        <template
+                                v-for="(item, index) in data!.children"
+                                :key="item.id">
+                            <comment
+                                    :data="item"
+                            />
+                        </template>
+                    </TransitionGroup>
                 </template>
             </MyCollapse>
         </div>
@@ -133,10 +131,6 @@ onBeforeMount(() => {
 	unLikeCount.value = props.data.unLikeCount;
 });
 
-const emits = defineEmits<{
-	(e: "updateView", p: CommentType): void;
-	(e: "deleteComment", p: string): void;
-}>();
 
 // 返回用户名称的函数。
 function checkName(name: string): string {
@@ -164,11 +158,14 @@ function like() {
 	}).then(({data: {data}}) => {
 		if (!isLike.value) {
 			likeCount.value--;
+			props.data.likeCount--;
 		} else {
+			props.data.likeCount++;
 			likeCount.value++;
 		}
 		if (isLike.value && isNotLike.value) {
 			unLikeCount.value--;
+			props.data.unLikeCount--;
 			isNotLike.value = false;
 		}
 	});
@@ -207,17 +204,20 @@ function unLike() {
 	}).then(({data: {data}}) => {
 		if (!isNotLike.value) {
 			unLikeCount.value--;
+			props.data.unLikeCount--;
 		} else {
+			props.data.unLikeCount++;
 			unLikeCount.value++;
 		}
 		if (isNotLike.value && isLike.value) {
 			likeCount.value--;
+        props.data.likeCount--;
 			isLike.value = false;
 		}
 	});
 }
 
-function deleteComment() {
+function deleteComments() {
 	//判断当前评论是否是自己的
 	if (userInfoStore.user.id.localeCompare(props.data.user.id) === 0) {
 		ElMessageBox({
@@ -235,10 +235,9 @@ function deleteComment() {
 				patch(`${HttpURL.deleteComment}/${props.data.id}/${userInfoStore.user.id}`)
 					.then(value => {
 						ElMessage.success("删除成功");
-						emits("deleteComment", props.data.id);
+						deleteComment(props.data.id);
 					})
 					.catch(error => {
-						console.log(error);
 						ElMessage.warning("删除失败:" + error.data.error);
 					});
 			})
@@ -247,12 +246,16 @@ function deleteComment() {
 	}
 }
 
+const {updateView, deleteComment} = inject<{
+	updateView: (...arg: any[]) => void, deleteComment: (...arg: any[]) =>
+		void
+}>("comment") as { updateView: (...arg: any[]) => void, deleteComment: (...arg: any[]) => void };
 const comments = ref<string>("");
 const commentShow = ref<boolean>(false);
 const store = useUserInfoStore();
 const commit = () => {
 	c(comments.value, props.data.book.bookId, (book) => {
-		emits("updateView", book);
+		updateView(book);
 	}, props.data, props.data.root ?? props.data.id);
 	comments.value = "";
 	commentShow.value = false;
@@ -292,7 +295,6 @@ async function handle(): Promise<void> {
 			const parentId: string | undefined = record.get(c);
 			c.parent = parentId ? cache[parentId] : undefined;
 		});
-		children.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 		commentStore.updateComment(props.data.book.bookId, children, props.data.id);
 		collapseRef.value?.closeLoading();
 	} catch (e: any) {
@@ -373,5 +375,24 @@ h3 {
     align-items: center;
     display: flex;
 }
+
+.list-move, /* 对移动中的元素应用的过渡 */
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateX(30px);
+}
+
+/* 确保将离开的元素从布局流中删除
+  以便能够正确地计算移动的动画。 */
+.list-leave-active {
+    position: absolute;
+}
+
 
 </style>

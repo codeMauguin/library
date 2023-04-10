@@ -16,7 +16,9 @@
                                 <el-skeleton-item style="width: 200px;height: 300px" variant="image"/>
                             </template>
                             <template #default>
-                                <img :src="image" alt="" style="width: 200px;height: 300px" @load="load"/>
+                                <img :src="image" alt="" decoding="async" loading="lazy"
+                                     style="width: 200px;height: 300px"
+                                     @load="load"/>
                             </template>
                         </el-skeleton>
 
@@ -69,25 +71,39 @@
                 </div>
                 <el-divider/>
                 <div class="comment_title">
-                    <h1 style="margin: 20px 0 20px 0">图书评论</h1>
+                    <div class="comment_top">
+                        <h1>图书评论</h1>
+                        <div class="radio-inputs">
+                            <label class="radio">
+                                <input v-model="status" :value="true" name="radio" type="radio">
+                                <span class="name">点赞最多</span>
+                            </label>
+                            <label class="radio">
+                                <input v-model="status" :value="false" checked="" name="radio" type="radio">
+                                <span class="name">最近回复</span>
+                            </label>
+
+                        </div>
+                    </div>
                 </div>
                 <div class="comment">
-                    <el-card>
-                        <template
-                                v-for="(mock, index) in pageInstance!.view"
-                                v-if="pageInstance && pageInstance.view.length > 0"
-                                :key="mock.id">
-                            <my-comment
-                                    :data="mock"
-                                    @update-view="updateView"
-                                    @delete-comment="deleteComment"/>
-                            <el-divider v-if="index !== pageInstance?.view.length - 1"/>
+                    <transition-group name="list">
+                        <template v-for="(mock, index) in pageInstance!.view"
+                                  v-if="pageInstance && pageInstance.view.length > 0"
+                                  :key="mock.id">
+                            <div>
+                                <my-comment
+                                        :data="mock"
+                                />
+                                <el-divider v-if="index !== pageInstance?.view.length - 1"/>
+                            </div>
                         </template>
                         <el-empty
                                 v-else
                                 description="暂无评论"
                                 style="height: 100%"/>
-                    </el-card>
+                    </transition-group>
+
                 </div>
             </div>
             <div
@@ -100,12 +116,14 @@
                         placeholder="请友善交流"
                         show-word-limit
                         size="large"
-                        type="textarea"/>
+                        type="textarea"
+                        @keyup.ctrl.enter="commit"/>
                 <div style="flex: auto; margin-top: 20px">
                     <el-button @click="() => (commentContent = '')">cancel</el-button>
                     <el-button
                             type="primary"
-                            @click="commit">
+                            @click="commit"
+                    >
                         <template #icon>
                             <i class="icon-pinglunxiao iconfont"/>
                         </template>
@@ -144,6 +162,28 @@ const loading: Ref<boolean> = ref(true);
 const load = () => {
 	loading.value = false;
 };
+
+const status: Ref<boolean> = ref(false);
+watch(status, () => {
+	if (status.value) {
+		pageInstance.value?.updateData(
+			(value, totalSize) => {
+				value.sort((a, b) => {
+					if (a.likeCount === b.likeCount) return b.timestamp.getTime() - a.timestamp.getTime();
+					return b.likeCount - a.likeCount;
+				});
+				return totalSize;
+			}
+		);
+	} else {
+		pageInstance.value?.updateData(
+			(value, totalSize) => {
+				value.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+				return totalSize;
+			}
+		);
+	}
+});
 const data: UnwrapNestedRefs<Book> = reactive<Book>({
 														id       : "",
 														name     : "",
@@ -220,6 +260,9 @@ function deleteComment(id: string): void {
 	store.deleteComment(route.params.id as string, id);
 }
 
+provide<{ updateView: (...arg: any[]) => void, deleteComment: (...arg: any[]) => void }>("comment",
+																						 {updateView, deleteComment});
+
 function updateView(comment: CommentType): void {
 	store.updateComment(route.params.id as string, comment);
 }
@@ -241,6 +284,8 @@ const commit = () => {
 </script>
 
 <style scoped>
+@import url("@/views/css/slide_input.css");
+
 .___body {
     width: 100%;
     display: flex;
@@ -271,6 +316,12 @@ const commit = () => {
     z-index: 10;
     position: sticky;
     top: 0;
+    padding: 10px;
+}
+
+.comment_top {
+    display: flex;
+    justify-content: space-between;
 }
 
 .comment {
@@ -289,5 +340,23 @@ const commit = () => {
 
 .option {
     align-self: flex-end;
+}
+
+.list-move, /* 对移动中的元素应用的过渡 */
+.list-enter-active,
+.list-leave-active {
+    transition: all 0.5s ease;
+}
+
+.list-enter-from,
+.list-leave-to {
+    opacity: 0;
+    transform: translateX(30px);
+}
+
+/* 确保将离开的元素从布局流中删除
+  以便能够正确地计算移动的动画。 */
+.list-leave-active {
+    position: absolute;
 }
 </style>

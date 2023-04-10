@@ -12,7 +12,7 @@
                         <el-skeleton-item class="book-view" variant="image"/>
                     </template>
                 </el-skeleton>
-                <img :src="image" alt="" class="book-view" @load="loader"/>
+                <img :src="image" alt="" class="book-view"  decoding="async" loading="lazy" @load="loader"/>
                 <div class="zhe">
                     <div class="gou">
                         <el-tooltip

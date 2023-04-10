@@ -41,7 +41,6 @@ export const useCommentStore = defineStore("comment", () => {
 								ResponseApi<PageData<CommentType>>
 							>): PageData<CommentType> => {
 								data.value = data.value.map((v: unknown) => map(<returnType>v));
-								
 								return data;
 							})
 						.catch(reason => {
@@ -98,13 +97,16 @@ export const useCommentStore = defineStore("comment", () => {
 					console.warn(`未找到${bookId}书籍评论`);
 				} else {
 					parent?.children?.unshift(...comment);
+					parent?.children?.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
 				}
+				value.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
 				return size;
 			});
 		} else {
 			if (Assert.isNull(comment.parent) || Assert.isNull(comment.root)) {
 				target.updateData((value, size) => {
 					value.unshift(comment);
+					value.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
 					return size + 1;
 				});
 			} else {
@@ -116,7 +118,9 @@ export const useCommentStore = defineStore("comment", () => {
 						console.warn(`未找到${bookId}书籍评论`);
 					} else {
 						parent?.children?.push(comment);
+						parent?.children?.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
 					}
+					value.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
 					return size;
 				});
 			}

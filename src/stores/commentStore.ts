@@ -47,7 +47,7 @@ export const useCommentStore = defineStore("comment", () => {
 							throw reason;
 						});
 				}
-			})(), {}, true
+			})(), {pageSize:5}, true
 		);
 	}
 	

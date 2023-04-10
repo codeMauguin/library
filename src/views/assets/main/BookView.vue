@@ -73,14 +73,18 @@
                 <div class="comment_title">
                     <div class="comment_top">
                         <h1>图书评论</h1>
-                        <div class="radio-inputs">
+                        <div v-if="pageInstance && pageInstance.view.length > 0" class="radio-inputs">
                             <label class="radio">
-                                <input v-model="status" :value="true" name="radio" type="radio">
+                                <input v-model="status" :value="1" name="radio" type="radio">
                                 <span class="name">点赞最多</span>
                             </label>
                             <label class="radio">
-                                <input v-model="status" :value="false" checked="" name="radio" type="radio">
-                                <span class="name">最近回复</span>
+                                <input v-model="status" :value="2" name="radio" type="radio">
+                                <span class="name">正序</span>
+                            </label>
+                            <label class="radio">
+                                <input v-model="status" :value="3" checked="" name="radio" type="radio">
+                                <span class="name">倒序</span>
                             </label>
 
                         </div>
@@ -103,7 +107,17 @@
                                 description="暂无评论"
                                 style="height: 100%"/>
                     </transition-group>
-
+                    <div style="display: flex;justify-content: center">
+                        <el-pagination
+                                v-if="pageInstance && pageInstance.view.length > 0"
+                                v-model:current-page="pageInstance.pageInfo.currentIndex"
+                                v-model:page-size="pageInstance.pageInfo.pageSize"
+                                v-model:total="pageInstance.pageInfo.totalSize"
+                                class="el-pagination"
+                                layout="total,prev, pager, next,jumper"
+                                @current-change="index => pageInstance.next(index)"
+                        />
+                    </div>
                 </div>
             </div>
             <div
@@ -144,7 +158,7 @@
     </div>
 </template>
 <script lang="ts" setup>
-import type { Page }                                 from "@/components/Pages/Page2";
+import type { PageInstance }                         from "@/components/Pages/Page2";
 import { useReaderStore }                            from "@/stores/readerStore";
 import { useShopStore }                              from "@/stores/ShopStore";
 import type Book                                     from "@/types/Book";
@@ -163,9 +177,12 @@ const load = () => {
 	loading.value = false;
 };
 
-const status: Ref<boolean> = ref(false);
-watch(status, () => {
-	if (status.value) {
+const status: Ref<number> = ref(3);
+
+// 上面的代码定义了一个名为“f1”的函数，它根据“status”变量的值根据不同的标准对数据进行排序。如果 status 等于 1，则数据按喜欢的数量排序，然后按时间戳降序排列。如果 status 等于
+// 3，则数据按时间戳降序排列。否则，数据按时间戳升序排序。排序是使用数据数组的“sort”方法完成的，排序后的数据被传递给一个数组的“updateData”方法
+function f1() {
+	if (status.value === 1) {
 		pageInstance.value?.updateData(
 			(value, totalSize) => {
 				value.sort((a, b) => {
@@ -175,14 +192,25 @@ watch(status, () => {
 				return totalSize;
 			}
 		);
-	} else {
+	} else if (status.value === 3) {
 		pageInstance.value?.updateData(
 			(value, totalSize) => {
 				value.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 				return totalSize;
 			}
 		);
+	} else {
+		pageInstance.value?.updateData(
+			(value, totalSize) => {
+				value.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+				return totalSize;
+			}
+		);
 	}
+}
+
+watch(status, () => {
+	f1();
 });
 const data: UnwrapNestedRefs<Book> = reactive<Book>({
 														id       : "",
@@ -223,10 +251,7 @@ async function loader(id: string): Promise<void> {
 		merge(data, book);
 	}
 	pageInstance.value = store.getBookComment(id, userStore.user.id);
-	pageInstance.value?.refresh().then(() => {
-		pageInstance.value?.view.sort((b, a) => a.timestamp.getTime() - b.timestamp.getTime());
-		pageInstance.value!.pageUpdate((page) => (page.pageSize = pageInstance.value?.pageInfo.totalSize, page));
-	});
+	f1();
 	const cache: string | undefined = LRUCache.get(data.image as string);
 	if (cache === undefined) {
 		fetch(data.image as string).then(value => value.blob()).then(value => {
@@ -274,7 +299,7 @@ onBeforeMount(() => {
 onActivated(() => {
 	loader(route.params.id as string);
 });
-const pageInstance: Ref<Page<CommentType> | null> = shallowRef(null);
+const pageInstance: Ref<PageInstance<CommentType> | null> = shallowRef(null);
 const commentContent = ref<string>("");
 const commit = () => {
 	c(commentContent.value, route.params.id as string, updateView);
@@ -351,7 +376,6 @@ const commit = () => {
 .list-enter-from,
 .list-leave-to {
     opacity: 0;
-    transform: translateX(30px);
 }
 
 /* 确保将离开的元素从布局流中删除

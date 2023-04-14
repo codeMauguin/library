@@ -1,10 +1,9 @@
 <!-- @format -->
 
 <template>
-    <div>
         <div
-                v-if="data.id.length > 0"
-                style="width: 100%; height: auto">
+            v-if="data.id.length > 0"
+              >
             <div class="comment_title">
                 <h1> 图书信息</h1>
             </div>
@@ -151,11 +150,11 @@
                     :closed="closed"
                     class="drawer"
                     @delete="(row:Book)=>shoppingCart.removeAProduct(row)"/>
+            <el-backtop :bottom="170" :right="100" target="#view-body" />
         </div>
         <el-empty
                 v-else
                 description="书籍不存在"/>
-    </div>
 </template>
 <script lang="ts" setup>
 import type { PageInstance }                         from "@/components/Pages/Page2";
@@ -357,7 +356,7 @@ const commit = () => {
 
 .comment_footer {
     position: sticky;
-    width: 30%;
+    width: 100%;
     bottom: 0;
     z-index: 100;
     background-color: white;

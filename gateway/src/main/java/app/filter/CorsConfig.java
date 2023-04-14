@@ -11,8 +11,11 @@ import java.util.List;
 
 @Configuration
 public class CorsConfig {
-	
-	private final String[] origins = {"http://localhost", "http://127.0.0.1",
+	private final String[] origins = {
+			"http://localhost",
+			"http://127.0.0.1",
+			"http://mauguin",
+											 "https://lbrary.ddnsto.com",
 			"http://192.168.100.139"};
 	private final String[] headers = {
 			"bl", "Access-Control-Allow-Origin",

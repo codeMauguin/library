@@ -1,6 +1,7 @@
 package app.filter;
 
 import app.utils.AESUtil;
+import jakarta.annotation.Nonnull;
 import org.reactivestreams.Publisher;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
@@ -33,7 +34,8 @@ public class ResponseSignalGatewayFilterFactory extends AbstractNameValueGateway
 				new ServerHttpResponseDecorator(response) {
 					
 					@Override
-					public Mono<Void> writeWith(Publisher<? extends DataBuffer> body) {
+					@Nonnull
+					public Mono<Void> writeWith(@Nonnull Publisher<? extends DataBuffer> body) {
 						if ((body instanceof Flux<? extends DataBuffer> next)) {
 							return super.writeWith(next.buffer().map(dataBuffers -> {
 								DataBufferFactory factory = new DefaultDataBufferFactory();

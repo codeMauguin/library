@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import jakarta.annotation.Nonnull;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.factory.AbstractNameValueGatewayFilterFactory;
@@ -117,6 +118,7 @@ public class TerminalSignalTokenGatewayFilterFactory extends AbstractNameValueGa
 		
 		return new ServerHttpRequestDecorator(exchange.getRequest()) {
 			@Override
+			@Nonnull
 			public HttpHeaders getHeaders() {
 				var length = headers.getContentLength();
 				var header = new HttpHeaders();
@@ -130,6 +132,7 @@ public class TerminalSignalTokenGatewayFilterFactory extends AbstractNameValueGa
 			}
 			
 			@Override
+			@Nonnull
 			public Flux<DataBuffer> getBody() {
 				return outputMessage.getBody();
 			}

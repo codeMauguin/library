@@ -98,7 +98,7 @@
 
     <update id="like">
         UPDATE lb_comment_info
-        SET status =0
+        SET status = 0
         WHERE comment_id = #{id}
           AND userId = #{cardId}
     </update>

@@ -9,9 +9,10 @@
         AND #{total} > borrowed
     </update>
     <select id="getAllUser" resultType="app.pojo.Admin_user">
-        SELECT l.id, l.name, l.permissions, lc.id as cardId, lc.borrowed, lc.total
+        SELECT l.id, l.name, l.permissions, lc.id as cardId, lc.borrowed, lc.total,la.status
         FROM lb_user l
         LEFT JOIN lb_card lc ON lc.userId = l.id
+        LEFT JOIN lb_account la ON la.id = l.id
         <choose>
             <when test="pageInfo.id != null">
                 WHERE l.id > #{pageInfo.id}
@@ -36,7 +37,9 @@
         UPDATE lb_account
         SET status = #{status}
         WHERE id = #{id}
-        AND (SELECT 1 FROM lb_user lu WHERE lu.id = #{id} AND lu.permissions != "admin")
+        AND (SELECT 1 FROM lb_user lu WHERE lu.id = #{id} AND lu.permissions <![CDATA[
+        <>
+        ]]> "admin")
     </update>
 
     <update id="updateUserRole">

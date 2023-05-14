@@ -10,7 +10,7 @@ public interface AdminService {
 	
 	Boolean updateUserTotal(Long id, Integer total);
 	
-	Boolean pullIntoTheBlacklist(Long id);
+	Boolean updateUserState(Long id,Short state);
 	
 	PageData<Backer> getUsersBack(PageInfo pageInfo, Boolean isNormal,
 								  Boolean isBlack,

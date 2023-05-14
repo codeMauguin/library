@@ -139,6 +139,7 @@ public class TerminalSignalTokenGatewayFilterFactory extends AbstractNameValueGa
 		};
 	}
 	
+
 	@Override
 	public int getOrder() {
 		return 0;

@@ -17,6 +17,8 @@ import pojo.PageInfo;
 import java.sql.SQLException;
 import java.util.List;
 
+import static app.views.AdminCenterImpl.USER_STATE;
+
 @Service
 public class AdminServiceImpl implements AdminService {
 	private final AdminDao adminDao;
@@ -44,11 +46,12 @@ public class AdminServiceImpl implements AdminService {
 		return adminDao.updateUserTotal(id, total);
 	}
 	
+	
 	@Override
 	@Transactional(rollbackFor = {SQLException.class, Exception.class,
 			IllegalStateException.class})
-	public Boolean pullIntoTheBlacklist(Long id) {
-		Assert.state(adminDao.pull(id, 1), "拉黑失败");
+	public Boolean updateUserState(Long id, Short state){
+		Assert.state(adminDao.pull(id, state), "设置状态失败");
 		Assert.state(adminDao.updateUserRole(id, "NOT_SAFE"), "权限纠正失败");
 		accountService.logout(id);
 		return true;
@@ -68,7 +71,7 @@ public class AdminServiceImpl implements AdminService {
 	@Transactional(rollbackFor = {SQLException.class, Exception.class,
 			IllegalStateException.class})
 	public Boolean restoreInto(Long id) {
-		Assert.state(adminDao.pull(id, 0), "恢复失败");
+		Assert.state(adminDao.pull(id,  USER_STATE), "恢复失败");
 		Assert.state(adminDao.updateUserRole(id, "reader"), "权限纠正失败");
 		accountService.logout(id);
 		return true;

@@ -1,8 +1,9 @@
 package app.pojo;
 
+import lombok.Data;
+
 import java.io.Serial;
 import java.io.Serializable;
-import lombok.Data;
 
 @Data
 public class User implements Serializable {
@@ -13,4 +14,6 @@ public class User implements Serializable {
   private Long id;
   private String name;
   private String permissions;
+  private String image;
+  private short status;
 }

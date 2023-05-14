@@ -28,6 +28,9 @@ public interface AdminCenter {
 	@PutMapping("/api/pullIntoBackList")
 	RestResponse pullIntoTheBlacklist(@NotNull @RequestBody Long id);
 	
+	@PutMapping("/api/deleteUser")
+	RestResponse deleteUser(@NotNull @RequestBody Long id);
+	
 	@PutMapping("/api/restoreInto")
 	RestResponse restoreInto(@NotNull @RequestBody Long id);
 }

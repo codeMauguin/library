@@ -3,7 +3,7 @@ package Message;
 
 public enum ResponseCode {
 	
-	SUCCESS(1000, "服务正常"),
+	SUCCESS(1000, "success"),
 	REGISTRY(2002, "注册失败"),
 	REGISTRY_NAME(2003, "用户名重复"),
 	NO_PERMISSION(2005, "没有权限"),

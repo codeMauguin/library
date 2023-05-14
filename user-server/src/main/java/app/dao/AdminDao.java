@@ -15,7 +15,7 @@ public interface AdminDao {
 	
 	Boolean updateUserTotal(@Param("id") Long id, @Param("total") Integer total);
 	
-	Boolean pull(@Param("id") Long id, @Param("status") Integer status);
+	Boolean pull(@Param("id") Long id, @Param("status") Short status);
 	
 	boolean updateUserRole(@Param("id") Long id, @Param("notSafe") String notSafe);
 }

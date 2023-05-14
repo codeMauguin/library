@@ -3,7 +3,7 @@
 <template>
     <div ref="el" class="content" @scroll="scroll">
         <div
-                class=" _____boxed "
+                class=" _____boxed"
         >
             <TransitionGroup name="list" tag="ul">
                 <template

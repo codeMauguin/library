@@ -1,10 +1,9 @@
 /** @format */
 
 const HttpApi = {
-	login : "/user/v2/login",
-	logout: "/user/v2/logout",
-	BASEURL             : "http://mauguin:7000",
-	// BASEURL             : "https://libserver.ddnsto.com",
+	login  : "/user/v2/login",
+	logout : "/user/v2/logout",
+	BASEURL: "http://mauguin:7000", // BASEURL             : "https://libserver.ddnsto.com",
 	userInfo            : "/user/v2/userInfo",
 	getAllBooks         : "/reader/v2/books",
 	getBook             : "/reader/v2/book/",
@@ -49,6 +48,7 @@ export const AdminAPI = {
 	STATISTIC             : "/order/api/statistic",
 	STATISTIC_YEAR        : "/order/api/statistic/year",
 	PULL                  : "/user/api/pullIntoBackList",
+	DELETE_USER           : "/user/api/deleteUser",
 	restore               : "/user/api/restoreInto",
 	BATCH_URL             : "/reader/api/upload"
 };

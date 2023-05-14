@@ -127,11 +127,11 @@ function decrypt(key: string, value: AxiosResponse<any, any>): any {
 	}
 	return value;
 }
-
-instance.interceptors.response.use(value => {
+const decryptResponse=(value:AxiosResponse<any,any>) => {
 	const {key, lb} = value.config;
 	return lb ? decrypt(key, value) : value;
-}, err);
+};
+instance.interceptors.response.use(decryptResponse, error=>decryptResponse(error.response));
 
 /**
  * 身份验签

@@ -73,8 +73,9 @@
 						label="角色"
 						sortable>
 					<template #default="{ row }">
-						<el-tag :type="row.permissions === 'reader' ? 'info' : 'success'" hit size="large"
-						>{{ row.permissions === "reader" ? "读者" : "管理员" }}
+						<el-tag :type="row.status=== -1?'danger':row.permissions === 'reader' ? 'info' :'success'" hit
+										size="large"
+						>{{ row.status=== -1?"已删除":row.permissions === "reader" ? "读者" : "管理员"  }}
 						</el-tag>
 					</template>
 				</el-table-column>
@@ -92,13 +93,22 @@
 								</template>
 								修改
 							</el-button>
-							<el-button type="danger">
-								<template #icon>
-									<i class="iconfont icon-shanchu"/>
+							<template v-if="row.permissions !=='admin'">
+								<template v-if="row.status !== -1">
+									<el-button type="danger" @click="delUser(row)">
+										<template #icon>
+											<i class="iconfont icon-shanchu"/>
+										</template>
+										删除用户
+									</el-button>
 								</template>
-								
-								删除用户
-							</el-button>
+								<template v-else>
+									<el-button type="success" @click="restoreInto(row)">
+										恢复账户
+									</el-button>
+								</template>
+							</template>
+						
 						</el-button-group>
 					</template>
 				</el-table-column>
@@ -173,23 +183,15 @@
 </template>
 
 <script lang="ts" setup>
+import { AdminAPI }                 from "@/axios/HttpURL";
 import instance                     from "@/axios/index";
 import type ResponseApi             from "@/axios/ResponseApi";
 import { LoadPage, Page, PageData } from "@/components/Pages/Page2";
 import type { AxiosResponse }       from "axios";
+import { ElMessage }                from "element-plus";
 import {
-	ElButton,
-	ElDialog,
-	ElForm,
-	ElFormItem,
-	ElInput,
-	ElPageHeader,
-	ElPagination,
-	ElTable,
-	ElTableColumn,
-	ElTag,
-	FormInstance,
-	FormRules
+	ElButton, ElDialog, ElForm, ElFormItem, ElInput, ElPageHeader, ElPagination, ElTable, ElTableColumn, ElTag,
+	FormInstance, FormRules
 }                                   from "element-plus";
 import { reactive, ref }            from "vue";
 
@@ -204,25 +206,25 @@ type User = {
 	total: number;
 };
 const pageInstance = new Page<User>(
-	new (class implements LoadPage<User> {
-		public load(
-			offset: number,
-			pageSize: number,
-			size: number,
-			last?: User
-		): Promise<PageData<User>> {
-			return instance
-				.get(AdminAPI.ALREADY_ACCOUNT, {
-					params: {
-						offset,
-						pageSize,
-						size,
-						id: last
-					}
-				})
-				.then(({data: {data}}) => data);
-		}
-	})()
+		new (class implements LoadPage<User> {
+			public load(
+					offset: number,
+					pageSize: number,
+					size: number,
+					last?: User
+			): Promise<PageData<User>> {
+				return instance
+						.get(AdminAPI.ALREADY_ACCOUNT, {
+							params: {
+								offset,
+								pageSize,
+								size,
+								id: last
+							}
+						})
+						.then(({data: {data}}) => data);
+			}
+		})()
 );
 
 function search() {
@@ -230,22 +232,34 @@ function search() {
 
 function addReaderTotal(row: User): void {
 	instance
-		.patch(AdminAPI.UPDATE_READER_BORROWED, {
-			id   : row.id,
-			total: row.total
-		})
-		.then(({data: {data}}: AxiosResponse<ResponseApi<boolean>>): any => {
-			if (data)
-				success({
-					message: "修改成功"
-				});
-			else {
-				return Promise.reject({data: {error: "失败"}});
-			}
-		})
-		.catch((reason: any) => {
-			error(reason.data.error);
-		});
+			.patch(AdminAPI.UPDATE_READER_BORROWED, {
+				id   : row.id,
+				total: row.total
+			})
+			.then(({data: {data}}: AxiosResponse<ResponseApi<boolean>>): any => {
+				if (data)
+					success({
+										message: "修改成功"
+									});
+				else {
+					return Promise.reject({data: {error: "失败"}});
+				}
+			})
+			.catch((reason: any) => {
+				error(reason.data.error);
+			});
+}
+
+function restoreInto(row: any): void {
+	IfStream.of(instance.put(AdminAPI.restore, row.id)
+											.then(({data: {data}}) => data))
+					.then(() => {
+						row.status = 0;
+						success("已恢复");
+					})
+					.catch((e) => {
+						error("恢复失败");
+					});
 }
 
 const formInstance = ref<FormInstance | null>(null);
@@ -270,9 +284,9 @@ const title = ref<string>("增加读者");
 
 type instance = { id?: string; username: string; password: string };
 const data = reactive<instance>({
-	username: "",
-	password: ""
-});
+																	username: "",
+																	password: ""
+																});
 
 function addUser(): void {
 	formInstance.value?.validate(async (isValid: boolean): Promise<void> => {
@@ -289,18 +303,37 @@ function addUser(): void {
 			}
 			pageInstance.updateData((datas: User[], sizes: number) => {
 				datas.push({
-					id         : id.data.data,
-					name       : data.username,
-					cardId     : "",
-					borrowed   : 0,
-					permissions: status.value === 0 ? "reader" : "admin",
-					total      : 0
-				});
+										 id         : id.data.data,
+										 name       : data.username,
+										 cardId     : "",
+										 borrowed   : 0,
+										 permissions: status.value === 0 ? "reader" : "admin",
+										 total      : 0
+									 });
 				return sizes + 1;
 			});
 		} catch (e) {
 		}
 	});
+}
+
+async function delUser(row: any): Promise<void> {
+	try {
+		const {
+						data: {
+							data,
+							error
+						}
+					} = await instance.put(AdminAPI.DELETE_USER, row.id);
+		ElMessage.success(data);
+		row.status = -1;
+	} catch ({
+		data: {
+			error
+		}
+	}) {
+		ElMessage.error(<any>error);
+	}
 }
 
 const rules: FormRules = {
@@ -327,22 +360,22 @@ const rules: FormRules = {
 
 <style scoped>
 .contain {
-    width: 100%;
-    flex-grow: 1;
-    align-self: flex-start;
+	width: 100%;
+	flex-grow: 1;
+	align-self: flex-start;
 }
 
 .container {
-    display: flex;
-    justify-content: space-between;
-    height: 50px !important;
+	display: flex;
+	justify-content: space-between;
+	height: 50px !important;
 }
 
 .el-pagination {
-    flex-shrink: 0;
+	flex-shrink: 0;
 }
 
 .el-table {
-    align-self: center;
+	align-self: center;
 }
 </style>
